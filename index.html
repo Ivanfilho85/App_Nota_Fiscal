@@ -4641,7 +4641,9 @@ function buildPgChips(){
     chip.onclick=(function(pg){ return function(){ irParaPagina(pg); }; })(p);
     container.appendChild(chip);
   }
-  document.getElementById('pg-selector-bar').style.display='flex';
+  // Mesma regra: a barra de páginas é do visualizador. Mostrada a partir da
+  // fila, ela apareceria sobre os cards. O switchVTab a exibe ao voltar.
+  if(abaVisualizadorAtiva()) document.getElementById('pg-selector-bar').style.display='flex';
 }
 function refreshChips(){ document.querySelectorAll('.pg-chip').forEach(function(c,i){ c.classList.toggle('sel', !!pageStamps[i+1]); }); }
 function irParaPagina(p){ if(p>=1 && p<=totPg && p!==curPg) changePg(p-curPg); }
@@ -4699,8 +4701,27 @@ function onZoomInput(el){
   if(!isNaN(v)&&v>=40&&v<=300){setZoom(v/100);}
 }
 function resetZoom(){setZoom(1.0);}
-function showViewer(){document.getElementById('viewer-ph').style.display='none';document.getElementById('viewer-scroll').style.display='flex';document.getElementById('viewer-toolbar').style.display='flex';}
-function hideViewer(){document.getElementById('viewer-ph').style.display='flex';document.getElementById('viewer-scroll').style.display='none';document.getElementById('viewer-toolbar').style.display='none';document.getElementById('pg-selector-bar').style.display='none';}
+// Quem decide o que aparece na área central é o switchVTab, a partir da aba
+// ativa e do pdfDoc. O showViewer/hideViewer só podem tocar nisso quando a aba
+// do Visualizador está aberta — senão o visualizador (ou o placeholder "Carregue
+// um PDF...") aparece por cima da lista de NF em Lote.
+//
+// Era o que acontecia ao abrir uma nota escaneada pela fila: o carregamento
+// chamava showViewer() ainda na aba da fila, e o cancelamento chamava
+// hideViewer(), deixando o placeholder empilhado sobre os cards.
+//
+// Não precisa "lembrar" de aplicar depois: ao voltar para a aba, o switchVTab
+// recalcula tudo pelo pdfDoc.
+function abaVisualizadorAtiva(){
+  try{ return (sessionStorage.getItem('me_nf_vtab')||'viewer')==='viewer'; }
+  catch(e){ return true; }
+}
+function showViewer(){
+  if(!abaVisualizadorAtiva()) return;
+  document.getElementById('viewer-ph').style.display='none';document.getElementById('viewer-scroll').style.display='flex';document.getElementById('viewer-toolbar').style.display='flex';}
+function hideViewer(){
+  if(!abaVisualizadorAtiva()) return;
+  document.getElementById('viewer-ph').style.display='flex';document.getElementById('viewer-scroll').style.display='none';document.getElementById('viewer-toolbar').style.display='none';document.getElementById('pg-selector-bar').style.display='none';}
 let _statusTimer=null;
 // autoHideMs > 0: a mensagem desaparece sozinha depois desse tempo.
 function setStatus(msg,tipo='idle',autoHideMs=0){
