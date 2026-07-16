@@ -1480,6 +1480,7 @@ async function syncPull(){
       });
       saveConfig(cfg);
     }
+    anotarMarca(d);              // evita puxar de novo o que acabamos de puxar
     localStorage.setItem(SK_SYNC_TS,Date.now());
     return {ok:true};
   }catch(e){ console.warn('syncPull:',e); return {ok:false,erro:e.message}; }
@@ -1510,6 +1511,8 @@ async function syncPush(){
     // outra máquina de ressuscitar o registro. Se o push falhar, continuam
     // aqui e vão na próxima tentativa.
     if(d&&d.ok) limparExcluidos(excluidos);
+    // Quem empurrou já tem os dados: anota a marca nova para não puxar de volta.
+    anotarMarca(d);
     localStorage.setItem(SK_SYNC_TS,Date.now());
     setSyncStatus('ok');
     setTimeout(function(){ setSyncStatus(''); },2500);
@@ -1533,19 +1536,38 @@ async function syncPush(){
 // Agora puxa a cada PULL_INTERVALO e sempre que a aba volta ao foco (o caso
 // real: você fica no PDF, volta para a Dashboard e quer ver o que mudou).
 // Trocar de aba é o gatilho mais barato e mais preciso que existe.
-const PULL_INTERVALO = 60000;   // 1 min — o volume é baixo, a cota do Apps Script não sente
-let _pullTimer=null, _pullEmAndamento=false;
+// Duas velocidades, de propósito:
+//   CHECK  — pergunta "mudou algo?" (o servidor lê UMA propriedade, ~0,2s)
+//   PULL   — baixa a base (o servidor lê a planilha toda, ~2s)
+//
+// O web app roda como o dono do script, então TODA sincronização de TODOS os
+// usuários sai da cota dele: 6h de execução por dia. Puxar a base inteira a
+// cada poucos segundos, vezes N usuários, estoura. Perguntar é ~10x mais
+// barato, e o pull só acontece quando a resposta muda — ou seja, quando
+// alguém realmente carimbou algo.
+const CHECK_INTERVALO = 8000;    // percepção de "quase imediato"
+const PULL_GARANTIA   = 300000;  // 5 min: pull completo mesmo sem mudança
+                                 // aparente — rede de segurança caso a marca
+                                 // falhe por algum motivo.
+let _syncTimer=null, _pullEmAndamento=false;
+let _ultimaMarca=null, _ultimoPullCheio=0;
+
+// Guarda a marca que o servidor devolveu, para não puxar o que já temos.
+function anotarMarca(d){
+  if(d && d.log_ts!=null && d.log_ts!=='') _ultimaMarca=String(d.log_ts);
+}
 
 async function pullAutomatico(motivo){
   if(!SESSION || !APPS_SCRIPT_URL || _pullEmAndamento) return;
   if(!navigator.onLine) return;
   // Não puxa por cima de um push em andamento: o push é a verdade mais nova
   // desta máquina e o pull chegaria a conclusões erradas sobre o que existe.
-  if(syncEmAndamento){ return; }
+  if(syncEmAndamento) return;
   _pullEmAndamento=true;
   try{
     const r=await syncPull();
     if(r && r.ok){
+      _ultimoPullCheio=Date.now();
       // Só redesenha se a tela mostra dados — evita repintar à toa.
       try{ renderInlineDash(); }catch(e){}
       try{ if(document.getElementById('admin-screen')?.style.display!=='none') renderAdminDash(); }catch(e){}
@@ -1555,17 +1577,37 @@ async function pullAutomatico(motivo){
   finally{ _pullEmAndamento=false; }
 }
 
+// O laço barato. Só chama o pullAutomatico quando há motivo.
+async function verificarMudanca(motivo){
+  if(!SESSION || !APPS_SCRIPT_URL || _pullEmAndamento || syncEmAndamento) return;
+  if(!navigator.onLine) return;
+  // Rede de segurança: de tempos em tempos puxa mesmo sem sinal de mudança.
+  if(Date.now()-_ultimoPullCheio > PULL_GARANTIA) return pullAutomatico('garantia');
+  try{
+    const d=await chamarAppsScript({acao:'sync_check'});
+    if(!d || !d.ok) return;
+    const marca=String(d.ts||'0');
+    if(_ultimaMarca===null){ _ultimaMarca=marca; return; }  // 1ª vez: só registra
+    if(marca!==_ultimaMarca){ _ultimaMarca=marca; await pullAutomatico(motivo); }
+  }catch(e){ /* sem rede: o laço tenta de novo depois */ }
+}
+
 function iniciarPullAutomatico(){
-  if(_pullTimer) return;
-  _pullTimer=setInterval(()=>pullAutomatico('intervalo'), PULL_INTERVALO);
+  if(_syncTimer) return;
+  _syncTimer=setInterval(()=>{
+    // Aba escondida não precisa de dado fresco — e cada verificação custa cota.
+    if(document.hidden) return;
+    verificarMudanca('intervalo');
+  }, CHECK_INTERVALO);
   // Voltar para a aba é o momento em que a pessoa QUER ver o que mudou.
   document.addEventListener('visibilitychange', function(){
-    if(!document.hidden) pullAutomatico('foco');
+    if(!document.hidden) verificarMudanca('foco');
   });
   window.addEventListener('online', ()=>pullAutomatico('rede voltou'));
 }
 function pararPullAutomatico(){
-  if(_pullTimer){ clearInterval(_pullTimer); _pullTimer=null; }
+  if(_syncTimer){ clearInterval(_syncTimer); _syncTimer=null; }
+  _ultimaMarca=null; _ultimoPullCheio=0;
 }
 
 function syncPushBackground(){
