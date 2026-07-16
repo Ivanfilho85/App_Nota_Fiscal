@@ -1414,6 +1414,24 @@ async function syncPull(){
   try{
     const d=await chamarAppsScript({acao:'sync_pull'});
     if(!d.ok) return d;
+    // ── Reset global do log ("Limpar Todos") ──────────────────────────
+    // Se o servidor pediu um reset mais novo do que o já aplicado aqui,
+    // descarta TODOS os registros anteriores ao reset (inclui os sem id e os
+    // sem ts) ANTES de qualquer mesclagem — é o que impede os registros
+    // voltarem depois de limpar. Só sobrevive o que foi carimbado DEPOIS.
+    if(d.config && d.config.log_reset_ts){
+      const servTs=Number(d.config.log_reset_ts)||0;
+      const localTs=Number(getLogResetTs())||0;
+      if(servTs>localTs){
+        const mantidos=getLog().filter(r=>{
+          const t=(r&&r.ts)?Date.parse(r.ts):0;
+          return t && t>servTs;
+        });
+        setLogDoServidor(mantidos);
+        localStorage.removeItem(SK_EXCLUIDOS);
+        marcarLogReset(servTs);
+      }
+    }
     if(d.usuarios&&d.usuarios.length){
       const merged=mergeUsuariosSync(d.usuarios);
       localStorage.setItem(SK_U,JSON.stringify(merged));
@@ -1724,6 +1742,13 @@ function limparExcluidos(ids){
   localStorage.setItem(SK_EXCLUIDOS,
     JSON.stringify(getExcluidos().filter(i=>!enviados.has(i))));
 }
+
+// Marca do último "Limpar Todos" já aplicado nesta máquina. O servidor guarda
+// um carimbo de tempo de reset; quando o dele é mais novo, a máquina descarta
+// os registros anteriores ao reset (inclusive os SEM id) no próximo sync_pull.
+const SK_LOG_RESET='me_nf_log_reset_ts';
+const getLogResetTs=()=>{ try{return localStorage.getItem(SK_LOG_RESET)||'0';}catch{return '0';} };
+function marcarLogReset(ts){ try{ localStorage.setItem(SK_LOG_RESET,String(ts||'0')); }catch(e){} }
 
 function saveLog(a){
   // Detecta a exclusão por DIFERENÇA com o que estava salvo. Fazer aqui pega
@@ -2757,10 +2782,29 @@ async function limparTodosRegistros(){
          +'os registros somem de todas as máquinas, não só desta.',
     ok:'Excluir os '+n, perigo:true
   })) return;
-  saveLog([]);
-  renderAdminDash();
-  renderInlineDash();
-  showToast('Todos os registros foram excluídos.');
+  if(!APPS_SCRIPT_URL){
+    showToast('⚠ Sincronização não configurada — não é possível limpar com segurança.');
+    return;
+  }
+  // Autoritativo: o SERVIDOR apaga a aba Log e publica um carimbo de reset.
+  // Assim funciona mesmo para registros antigos SEM id (que a lápide por id não
+  // pegava — era a causa de eles voltarem no "atualizar dados").
+  showToast('⏳ Limpando no servidor…');
+  try{
+    const d=await chamarAppsScript({acao:'limpar_log'});
+    if(!d||!d.ok){
+      showToast('⚠ Não foi possível limpar: '+((d&&d.erro)||'erro desconhecido'));
+      return;
+    }
+    if(d.log_reset_ts) marcarLogReset(d.log_reset_ts);
+    setLogDoServidor([]);                 // zera local SEM disparar re-push
+    localStorage.removeItem(SK_EXCLUIDOS);
+    renderAdminDash();
+    renderInlineDash();
+    showToast('✅ '+n+' registro(s) excluído(s) em todas as máquinas.');
+  }catch(e){
+    showToast('⚠ Erro de rede ao limpar: '+e.message);
+  }
 }
 
 // Exportar CSV
