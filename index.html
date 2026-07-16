@@ -1523,6 +1523,51 @@ async function syncPush(){
   finally{ syncEmAndamento=false; }
 }
 
+// ─── PULL AUTOMÁTICO ─────────────────────────────────────────────
+// O app puxava dados do servidor em três momentos: no login, no botão manual
+// e no "forçar pull". Nunca sozinho. Quem ficasse logado não recebia mais nada
+// — o colega carimbava, o registro subia para a planilha, e a tela só
+// descobria se a pessoa saísse e entrasse de novo. Era isso que fazia as ações
+// de um usuário não aparecerem para os outros.
+//
+// Agora puxa a cada PULL_INTERVALO e sempre que a aba volta ao foco (o caso
+// real: você fica no PDF, volta para a Dashboard e quer ver o que mudou).
+// Trocar de aba é o gatilho mais barato e mais preciso que existe.
+const PULL_INTERVALO = 60000;   // 1 min — o volume é baixo, a cota do Apps Script não sente
+let _pullTimer=null, _pullEmAndamento=false;
+
+async function pullAutomatico(motivo){
+  if(!SESSION || !APPS_SCRIPT_URL || _pullEmAndamento) return;
+  if(!navigator.onLine) return;
+  // Não puxa por cima de um push em andamento: o push é a verdade mais nova
+  // desta máquina e o pull chegaria a conclusões erradas sobre o que existe.
+  if(syncEmAndamento){ return; }
+  _pullEmAndamento=true;
+  try{
+    const r=await syncPull();
+    if(r && r.ok){
+      // Só redesenha se a tela mostra dados — evita repintar à toa.
+      try{ renderInlineDash(); }catch(e){}
+      try{ if(document.getElementById('admin-screen')?.style.display!=='none') renderAdminDash(); }catch(e){}
+      try{ populateSelects(); }catch(e){}
+    }
+  }catch(e){ console.warn('pullAutomatico('+motivo+'):',e); }
+  finally{ _pullEmAndamento=false; }
+}
+
+function iniciarPullAutomatico(){
+  if(_pullTimer) return;
+  _pullTimer=setInterval(()=>pullAutomatico('intervalo'), PULL_INTERVALO);
+  // Voltar para a aba é o momento em que a pessoa QUER ver o que mudou.
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden) pullAutomatico('foco');
+  });
+  window.addEventListener('online', ()=>pullAutomatico('rede voltou'));
+}
+function pararPullAutomatico(){
+  if(_pullTimer){ clearInterval(_pullTimer); _pullTimer=null; }
+}
+
 function syncPushBackground(){
   // Só sincronizar se há sessão ativa, URL configurada e app já inicializado
   if(_inicializando || !SESSION || !APPS_SCRIPT_URL) return;
@@ -1992,6 +2037,7 @@ function completarLogin(u){
   try{ filaRender(); }catch(e){}
   saveSession(u);
   showToast('Bem-vindo, '+u.nome.split(' ')[0]+'!');
+  iniciarPullAutomatico();   // a partir daqui a tela se mantém atualizada sozinha
   // Sincronização em segundo plano com atraso — não bloqueia a interface
   setTimeout(function(){
     setSyncStatus('syncing');
@@ -2031,6 +2077,7 @@ async function confirmarTrocaSenha(){
   showToast('✔ Senha definida! Bem-vindo(a), '+SESSION.nome.split(' ')[0]+'!');
 }
 function doLogout(){
+  pararPullAutomatico();   // sem sessão não há o que sincronizar
   SESSION=null;
   clearSession();
   try{ sessionStorage.setItem('me_nf_screen','app'); }catch(e){}
@@ -5968,6 +6015,12 @@ window.addEventListener('pageshow', function(e){
       document.getElementById('f-user-display').textContent=u.user;
       if(u.tipo==='Administrador'){const ai=document.getElementById('pill-admin-item');if(ai)ai.style.display='block';}
       populateSelects();
+      // O F5 restaura a sessão sem passar pelo completarLogin — então aqui não
+      // havia pull nenhum. A pessoa recarregava a página e continuava vendo
+      // dados velhos, o que fazia o app parecer quebrado justamente na hora em
+      // que ela tentava consertar recarregando.
+      iniciarPullAutomatico();
+      pullAutomatico('reload');
       // Restaurar a aba que estava ativa antes do F5 (Visualizador é o padrão).
       try{
         const savedTab=sessionStorage.getItem('me_nf_vtab');
