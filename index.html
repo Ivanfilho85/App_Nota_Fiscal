@@ -853,6 +853,30 @@ textarea{resize:vertical;min-height:46px;}
   </div>
 </div>
 
+<!-- ══ MODAL: Completar dados da NF que o app não conseguiu ler ══ -->
+<div class="modal-bg" id="modal-nf-manual">
+  <div class="modal-box" style="width:440px;">
+    <h3 style="color:var(--warn);">Não consegui ler a nota</h3>
+    <p style="font-size:13px;color:var(--grey-m);line-height:1.6;margin-bottom:4px;" id="nfm-msg"></p>
+    <div style="background:#FFFBEB;border-left:3px solid var(--warn);padding:9px 12px;
+                margin:10px 0 16px;font-size:12px;color:#92400E;">
+      Isso costuma acontecer com nota <strong>escaneada</strong> (o arquivo é uma imagem).
+      O carimbo funciona normalmente — só os dados abaixo precisam ser digitados.
+    </div>
+    <label class="fl">Nº da Nota Fiscal</label>
+    <input type="text" id="nfm-nfNum" inputmode="numeric" placeholder="ex.: 001568073" autocomplete="off"/>
+    <label class="fl" style="margin-top:10px;">Fornecedor</label>
+    <input type="text" id="nfm-forn" placeholder="Razão social do emitente" autocomplete="off"/>
+    <label class="fl" style="margin-top:10px;">Data da Nota</label>
+    <input type="text" id="nfm-dataNF" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off"/>
+    <div id="nfm-err" style="color:var(--danger);font-size:12px;min-height:16px;margin-top:8px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="nfm-cancelar">Cancelar</button>
+      <button class="btn btn-primary btn-sm" id="nfm-ok">Continuar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL: Confirmação genérica (substitui o confirm() do navegador) ══ -->
 <div class="modal-bg" id="modal-confirm">
   <div class="modal-box" style="width:420px;">
@@ -4133,6 +4157,76 @@ document.getElementById('f-cc').addEventListener('change',onCCChange);
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
+// ─── COMPLETAR DADOS DA NF QUE O APP NÃO LEU ─────────────────────
+// Rede de segurança para nota ESCANEADA: o PDF é uma imagem, então o PDF.js
+// renderiza e o carimbo funciona, mas não há texto para extrair.
+//
+// Só dispara quando algum dos três campos ficou vazio. Os leitores existentes
+// (nome do arquivo → texto do PDF) continuam mandando: o que eles conseguiram
+// ler vem preenchido e não é perguntado de novo.
+//
+// Devolve Promise<boolean>. false = o usuário cancelou → o arquivo NÃO carrega.
+const _nfVazio = v => { const t=String(v==null?'':v).trim(); return t===''||t==='-'||t==='–'; };
+
+function completarNFmanual(){
+  const falta = ['nfNum','forn','dataNF'].filter(c=>_nfVazio(nfData[c]));
+  if(!falta.length) return Promise.resolve(true);   // leu tudo: nem aparece
+
+  const rotulos={nfNum:'o número', forn:'o fornecedor', dataNF:'a data'};
+  return new Promise(resolve=>{
+    const g=id=>document.getElementById(id);
+    g('nfm-msg').innerHTML='Não consegui identificar <strong>'
+      + falta.map(c=>rotulos[c]).join('</strong>, <strong>').replace(/,([^,]*)$/,' e$1')
+      + '</strong> desta nota. Preencha para continuar.';
+    // Pré-preenche o que os leitores conseguiram — a prioridade é deles.
+    g('nfm-nfNum').value  = _nfVazio(nfData.nfNum)  ? '' : nfData.nfNum;
+    g('nfm-forn').value   = _nfVazio(nfData.forn)   ? '' : nfData.forn;
+    g('nfm-dataNF').value = _nfVazio(nfData.dataNF) ? '' : nfData.dataNF;
+    g('nfm-err').textContent='';
+    ['nfm-nfNum','nfm-forn','nfm-dataNF'].forEach(id=>g(id).style.borderColor='');
+
+    let respondido=false;
+    const fechar=v=>{
+      if(respondido) return; respondido=true;
+      closeModal('modal-nf-manual');
+      document.removeEventListener('keydown',onKey);
+      resolve(v);
+    };
+    const validar=()=>{
+      const nf=g('nfm-nfNum').value.trim();
+      const fo=g('nfm-forn').value.trim();
+      const dt=g('nfm-dataNF').value.trim();
+      const erros=[];
+      const nfOk = /\d/.test(nf);
+      const foOk = fo.length>=2;
+      const dtOk = dataRecebValida(dt);
+      if(!nfOk) erros.push('Nº da Nota');
+      if(!foOk) erros.push('Fornecedor');
+      if(!dtOk) erros.push(dataFuturaBR(dt)?'Data (não pode ser futura)':'Data (dd/mm/aaaa)');
+      g('nfm-nfNum').style.borderColor  = nfOk?'':'var(--danger)';
+      g('nfm-forn').style.borderColor   = foOk?'':'var(--danger)';
+      g('nfm-dataNF').style.borderColor = dtOk?'':'var(--danger)';
+      if(erros.length){ g('nfm-err').textContent='Preencha corretamente: '+erros.join(', '); return false; }
+      // Grava direto no nfData — daqui para frente o app não sabe (nem precisa
+      // saber) que veio da mão do usuário em vez do texto do PDF.
+      nfData.nfNum=padNF9(nf); nfData.forn=fo; nfData.dataNF=dt;
+      return true;
+    };
+    const onKey=e=>{
+      if(e.key==='Escape') fechar(false);
+      if(e.key==='Enter'){ e.preventDefault(); if(validar()) fechar(true); }
+    };
+    g('nfm-ok').onclick=()=>{ if(validar()) fechar(true); };
+    g('nfm-cancelar').onclick=()=>fechar(false);
+    g('modal-nf-manual').onclick=e=>{ if(e.target.id==='modal-nf-manual') fechar(false); };
+    document.addEventListener('keydown',onKey);
+    openModal('modal-nf-manual');
+    // Foca no primeiro campo que faltou, não no primeiro da tela.
+    setTimeout(()=>{ const alvo={nfNum:'nfm-nfNum',forn:'nfm-forn',dataNF:'nfm-dataNF'}[falta[0]];
+                     g(alvo)?.focus(); },60);
+  });
+}
+
 // ─── CONFIRMAÇÃO DENTRO DO APP ───────────────────────────────────
 // Substitui o confirm() do navegador, que além de destoar da interface tem um
 // problema concreto: numa mensagem de várias linhas ele corta o texto num
@@ -4431,7 +4525,11 @@ async function filaConcluir(id){
 }
 
 // ── Pipeline único de carregamento (usado pelo avulso e pela fila) ──
-async function carregarPdfNoVisualizador(bytes, fileName){
+// permitirManual: só o carregamento AVULSO abre a caixa de preenchimento.
+// O filaAbrir() não passa — na fila o app segue como antes. (E não dá para
+// deduzir o fluxo pelo filaAtualId: o filaAbrir só o define DEPOIS de chamar
+// esta função.)
+async function carregarPdfNoVisualizador(bytes, fileName, permitirManual){
   setStatus('Carregando PDF…','info');
   clearStamp();
   currentFileName = fileName.replace(/\.pdf$/i,'');
@@ -4456,6 +4554,19 @@ async function carregarPdfNoVisualizador(bytes, fileName){
     forn:   dadosNome ? dadosNome.forn  : dadosPDF.forn,
     dataNF: dadosPDF.dataNF,
   };
+
+  // Nota escaneada: os leitores não têm o que ler. Pergunta antes de deixar
+  // seguir — senão o carimbo sai com "–" e o registro nasce incompleto.
+  if(permitirManual){
+    const ok = await completarNFmanual();
+    if(!ok){
+      limpar();   // cancelou: o arquivo não fica carregado
+      setStatus('Carregamento cancelado — a nota precisa do número, do fornecedor e da data.','err',6000);
+      showToast('⚠ Nota não carregada: os dados não foram preenchidos.');
+      return;
+    }
+  }
+
   const now=new Date();
   const lt=calcLeadTime(nfData.dataNF);
   const ltStr=lt!=null?lt+' dias':'–';
@@ -4473,8 +4584,9 @@ document.getElementById('file-input').addEventListener('change',async e=>{
   filaAtualId=null;   // carregamento avulso (fora da fila)
   try{
     const bytes=await file.arrayBuffer();
-    await carregarPdfNoVisualizador(bytes, file.name);
+    await carregarPdfNoVisualizador(bytes, file.name, true);   // true = pode pedir os dados na mão
   }catch(err){ setStatus('Erro: '+err.message,'err'); }
+  finally{ e.target.value=''; }   // permite recarregar o MESMO arquivo depois de cancelar
 });
 
 function buildPgChips(){
