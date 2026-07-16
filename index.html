@@ -4504,7 +4504,17 @@ async function filaAbrir(id){
     setStatus('Lendo a nota…','info');
     const bytes=item.bytes;
     if(!bytes || !bytes.byteLength) throw new Error('arquivo vazio ou corrompido');
-    await carregarPdfNoVisualizador(bytes, item.nome);
+    // A fila pede os dados na mão igual ao avulso: sem isso, uma nota
+    // escaneada abria com "–" e virava registro incompleto na Dashboard.
+    const carregou = await carregarPdfNoVisualizador(bytes, item.nome, true);
+    if(!carregou){
+      // Cancelou: a nota NÃO abre, mas continua na fila para tentar depois —
+      // o upload não se perde. Sem este return, o app marcaria a nota como
+      // aberta e trocaria para um visualizador vazio.
+      await filaRender();
+      showToast('Nota mantida na fila — preencha os dados para carimbá-la.');
+      return;
+    }
     filaAtualId=id;
     if(item.status==='erro'){ try{ await filaAtualizar(id,{status:'fila',erro:''}); }catch(e){} }
     await filaRender();
@@ -4552,10 +4562,14 @@ async function filaConcluir(id){
 }
 
 // ── Pipeline único de carregamento (usado pelo avulso e pela fila) ──
-// permitirManual: só o carregamento AVULSO abre a caixa de preenchimento.
-// O filaAbrir() não passa — na fila o app segue como antes. (E não dá para
-// deduzir o fluxo pelo filaAtualId: o filaAbrir só o define DEPOIS de chamar
-// esta função.)
+// Devolve true se a nota ficou carregada, false se o usuário cancelou a caixa
+// de preenchimento. Quem chama PRECISA olhar o retorno: o filaAbrir trocava de
+// aba e marcava a nota como aberta sem saber que o visualizador tinha sido
+// limpo, levando a pessoa para uma tela vazia.
+//
+// permitirManual: se true, nota ilegível pede os dados na mão antes de seguir.
+// (Não dá para deduzir o fluxo pelo filaAtualId: o filaAbrir só o define
+// DEPOIS de chamar esta função.)
 async function carregarPdfNoVisualizador(bytes, fileName, permitirManual){
   setStatus('Carregando PDF…','info');
   clearStamp();
@@ -4590,7 +4604,7 @@ async function carregarPdfNoVisualizador(bytes, fileName, permitirManual){
       limpar();   // cancelou: o arquivo não fica carregado
       setStatus('Carregamento cancelado — a nota precisa do número, do fornecedor e da data.','err',6000);
       showToast('⚠ Nota não carregada: os dados não foram preenchidos.');
-      return;
+      return false;
     }
   }
 
@@ -4604,6 +4618,7 @@ async function carregarPdfNoVisualizador(bytes, fileName, permitirManual){
   document.getElementById('nf-stamp-data').textContent=now.toLocaleDateString('pt-BR');
   document.getElementById('nf-lt').innerHTML='<span class="'+ltCls+'">'+ltStr+'</span>';
   document.getElementById('nf-reader-box').style.display='block';
+  return true;
 }
 
 document.getElementById('file-input').addEventListener('change',async e=>{
