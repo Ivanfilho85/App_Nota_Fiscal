@@ -868,7 +868,10 @@ textarea{resize:vertical;min-height:46px;}
     <label class="fl" style="margin-top:10px;">Fornecedor</label>
     <input type="text" id="nfm-forn" placeholder="Razão social do emitente" autocomplete="off"/>
     <label class="fl" style="margin-top:10px;">Data da Nota</label>
-    <input type="text" id="nfm-dataNF" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" autocomplete="off"/>
+    <input type="text" id="nfm-dataNF" placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10"
+      autocomplete="off" oninput="onNfmDataInput(this)"
+      style="letter-spacing:1px;font-family:var(--mono);"/>
+    <div id="nfm-data-hint" style="font-size:11px;color:var(--grey-m);margin-top:3px;">Formato: dd/mm/aaaa</div>
     <div id="nfm-err" style="color:var(--danger);font-size:12px;min-height:16px;margin-top:8px;"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" id="nfm-cancelar">Cancelar</button>
@@ -3157,7 +3160,12 @@ function getDataRecebimento(){
   const el=document.getElementById('f-data-receb');
   return el ? el.value.trim() : '';
 }
-function onDataRecebInput(el){
+// Máscara dd/mm/aaaa reaproveitável. Foi extraída de dentro do
+// onDataRecebInput: a lógica do caret é a parte difícil (sem ela o cursor pula
+// para o fim e não dá para corrigir o meio da data), e duplicá-la em cada
+// campo novo seria criar duas máscaras para manter — que divergem na primeira
+// correção feita só de um lado.
+function mascararDataBR(el){
   // Preserva a posição do cursor pela contagem de dígitos antes do caret,
   // permitindo editar qualquer trecho (dia/mês/ano) sem saltar para o fim.
   const raw=el.value;
@@ -3176,20 +3184,38 @@ function onDataRecebInput(el){
     pos++;
   }
   try{ el.setSelectionRange(pos,pos); }catch(e){}
-  el.style.borderColor='';
-  const hint=document.getElementById('data-receb-hint');
-  if(hint){
-    if(out.length===10){
-      const ok=dataRecebValida(out);
-      hint.textContent = ok ? '✔ Data válida'
-        : (validarDataBR(out) ? '⚠ Data futura não permitida' : '⚠ Data inválida');
-      hint.style.color = ok ? 'var(--success)' : 'var(--danger)';
-    } else {
-      hint.textContent='Formato: dd/mm/aaaa';
-      hint.style.color='var(--grey-m)';
-    }
+  return out;
+}
+
+// Texto de apoio abaixo do campo — a MESMA regra e as MESMAS palavras nos dois
+// lugares onde se digita data.
+function dicaDataBR(hint, valor){
+  if(!hint) return;
+  if(valor.length===10){
+    const ok=dataRecebValida(valor);
+    hint.textContent = ok ? '✔ Data válida'
+      : (validarDataBR(valor) ? '⚠ Data futura não permitida' : '⚠ Data inválida');
+    hint.style.color = ok ? 'var(--success)' : 'var(--danger)';
+  } else {
+    hint.textContent='Formato: dd/mm/aaaa';
+    hint.style.color='var(--grey-m)';
   }
+}
+
+function onDataRecebInput(el){
+  const out=mascararDataBR(el);
+  el.style.borderColor='';
+  dicaDataBR(document.getElementById('data-receb-hint'), out);
   onFieldChange();
+}
+
+// A data da caixa manual usa a mesma máscara e a mesma dica do visualizador.
+function onNfmDataInput(el){
+  const out=mascararDataBR(el);
+  el.style.borderColor='';
+  dicaDataBR(document.getElementById('nfm-data-hint'), out);
+  const err=document.getElementById('nfm-err');
+  if(err) err.textContent='';
 }
 function onDataRecebPicker(el){
   if(!el.value) return;
@@ -4184,6 +4210,7 @@ function completarNFmanual(){
     g('nfm-dataNF').value = _nfVazio(nfData.dataNF) ? '' : nfData.dataNF;
     g('nfm-err').textContent='';
     ['nfm-nfNum','nfm-forn','nfm-dataNF'].forEach(id=>g(id).style.borderColor='');
+    dicaDataBR(g('nfm-data-hint'), g('nfm-dataNF').value);
 
     let respondido=false;
     const fechar=v=>{
