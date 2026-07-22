@@ -184,14 +184,24 @@ html,body{height:100%;font-family:var(--font);background:var(--grey-xl);color:va
 .badge-on{background:#D1FAE5;color:#065F46;}
 .badge-off{background:#FEE2E2;color:#991B1B;}
 .act-btn{background:none;border:none;cursor:pointer;font-size:11px;font-weight:700;padding:4px 8px;border-radius:4px;transition:background .12s;}
-/* ── Ferramentas da Dashboard (busca + ordenação) ── */
-.dash-tools{display:flex;align-items:center;gap:10px;margin:6px 0 10px;flex-wrap:wrap;}
-.dash-busca{flex:1;min-width:220px;max-width:420px;padding:7px 12px;font-size:12px;border:1px solid var(--grey-l);border-radius:6px;font-family:var(--font);outline:none;transition:border-color .12s;}
+
+.busca-cell{text-align:left !important;padding:4px 5px;}
+.busca-cell .dash-busca{width:100%;box-sizing:border-box;height:30px;padding:5px 10px;font-size:11px;border:1px solid var(--grey-l);border-radius:5px;font-family:var(--font);outline:none;}
+.busca-cell .dash-busca:focus{border-color:var(--blue);}
+.dash-busca{flex:1;min-width:240px;max-width:520px;box-sizing:border-box;height:34px;padding:7px 12px;font-size:12px;border:1px solid var(--grey-l);border-radius:6px;font-family:var(--font);outline:none;}
 .dash-busca:focus{border-color:var(--blue);}
+.dash-filtro{flex:0 1 180px;min-width:130px;max-width:200px;box-sizing:border-box;height:34px;font-size:12px;padding:6px 10px;border:1px solid var(--grey-l);border-radius:6px;background:var(--white);color:var(--dark);font-family:var(--font);cursor:pointer;}
+.dash-filtro:focus{outline:none;border-color:var(--blue);}
+.dash-filtro-mes{cursor:text;}
+/* Filtros alinhados à COLUNA: célula centralizada; controle proporcional à
+   largura da coluna (fill), centralizado sob o título. */
+.dash-filtro-row th{padding:4px 5px;background:var(--grey-xl);border-bottom:1px solid var(--grey-l);text-align:center;vertical-align:middle;}
+.dash-filtro-col{width:100%;max-width:100%;box-sizing:border-box;height:30px;font-size:11px;padding:4px 6px;border:1px solid var(--grey-l);border-radius:5px;background:var(--white);color:var(--dark);font-family:var(--font);text-align:left;text-align-last:left;}
+.dash-filtro-col:focus{outline:none;border-color:var(--blue);}
 .dash-tools-count{font-size:11px;color:var(--grey-m);font-weight:600;}
 .dash-tools-limpar{background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:700;text-decoration:underline;padding:2px 4px;}
-.dash-filtro{font-size:11px;padding:5px 8px;border:1px solid var(--grey-l);border-radius:6px;background:var(--white);color:var(--dark);font-family:var(--font);cursor:pointer;max-width:150px;}
-.dash-filtro:focus{outline:none;border-color:var(--blue);}
+.sec-hdr-flex{display:flex;align-items:center;gap:10px;}
+.dash-limpar-host{font-weight:400;text-transform:none;}
 #log-table th.th-ord{cursor:pointer;user-select:none;white-space:nowrap;}
 #log-table th.th-ord:hover{background:var(--blue-xl);}
 /* ── Gráficos ── */
@@ -649,7 +659,7 @@ textarea{resize:vertical;min-height:46px;}
     <div class="admin-tabs">
       <div class="admin-tab active" onclick="adminTab(0,this)">👥 Usuários</div>
       <div class="admin-tab" onclick="adminTab(1,this)">📍 Locais &amp; C.Custo</div>
-      <div class="admin-tab" onclick="adminTab(2,this)">📊 Dashboard</div>
+      <div class="admin-tab" onclick="adminTab(2,this)">📋 Registros</div>
       <div class="admin-tab" onclick="adminTab(3,this)">⚙ Configurações</div>
     </div>
 
@@ -1304,8 +1314,8 @@ textarea{resize:vertical;min-height:46px;}
       <div id="viewer-tabs" style="display:flex;border-bottom:1px solid var(--grey-l);background:var(--white);flex-shrink:0;">
         <button class="vtab active" id="vtab-viewer"  onclick="switchVTab('viewer',this)">📄 Visualizador</button>
         <button class="vtab"        id="vtab-fila"    onclick="switchVTab('fila',this)">📥 NF em Lote <span id="fila-badge" style="background:var(--gold);color:var(--dark);border-radius:10px;padding:0 6px;font-size:10px;margin-left:4px;display:none;">0</span></button>
-        <button class="vtab"        id="vtab-dash"    onclick="switchVTab('dash',this)">📊 Dashboard</button>
-        <button class="vtab"        id="vtab-graf"    onclick="switchVTab('graf',this)">📈 Gráficos</button>
+        <button class="vtab"        id="vtab-dash"    onclick="switchVTab('dash',this)">📋 Registros</button>
+        <button class="vtab"        id="vtab-graf"    onclick="switchVTab('graf',this)">📊 Dashboard</button>
       </div>
       <div id="viewer-toolbar" style="display:none;">
         <button class="nav-btn" id="btn-prev" onclick="changePg(-1)" disabled>◀</button>
@@ -2674,16 +2684,16 @@ const COLUNAS_DASH=[
   {h:'Item', ordf:null},
   {h:'Nº NF',           ordf:r=>padNF9(r.nfNum)},
   {h:'Fornecedor', wrap:true, ordf:r=>(r.forn||'').toLowerCase()},
-  {h:'Data NF',         ordf:r=>dataParaOrdenar(r.dataNF)},
-  {h:'Data Carimbo',    ordf:r=>dataParaOrdenar(r.dataCarimbo)},
+  {h:'Data NF',         ordf:r=>dataParaOrdenar(r.dataNF),      filtro:{tipo:'mes', key:'mesAnoNF'}},
+  {h:'Data Carimbo',    ordf:r=>dataParaOrdenar(r.dataCarimbo), filtro:{tipo:'mes', key:'mesAnoCar'}},
   {h:'Lead Time',       ordf:r=>(r.leadTime==null?-Infinity:r.leadTime)},
-  {h:'Local', wrap:true, ordf:r=>normalizeLocalNome(r.local||'').toLowerCase()},
+  {h:'Local', wrap:true, ordf:r=>normalizeLocalNome(r.local||'').toLowerCase(), filtro:{tipo:'select', key:'local', opt:r=>normalizeLocalNome(r.local)}},
   {h:'Centro de Custo', ordf:r=>parseCC(r.cc||'')},
-  {h:'Tipo',            ordf:r=>(r.tipo||'')},
-  {h:'Aplicação',       ordf:r=>(r.aplic||'')},
-  {h:'Conformidade',    ordf:r=>(r.conf||'')},
+  {h:'Tipo',            ordf:r=>(r.tipo||''), filtro:{tipo:'pares', key:'tipo', pares:[['PECAS','Peças/Mat.'],['SERVICOS','Serviços']]}},
+  {h:'Aplicação',       ordf:r=>(r.aplic||''), filtro:{tipo:'pares', key:'aplic', pares:[['DIRETA','Direta'],['ESTOQUE','Estoque']]}},
+  {h:'Conformidade',    ordf:r=>(r.conf||''), filtro:{tipo:'pares', key:'conf', pares:[['SIM','SIM'],['NAO','NÃO']]}},
   {h:'MIGO',            ordf:r=>(r.migo||'')},
-  {h:'USER',            ordf:r=>(r.user||'').toLowerCase()},
+  {h:'USER',            ordf:r=>(r.user||'').toLowerCase(), filtro:{tipo:'select', key:'user', opt:r=>r.user}},
 ];
 
 // dd/mm/aaaa -> aaaammdd (número) para ordenar data como data, não como texto.
@@ -2698,7 +2708,7 @@ function dataParaOrdenar(v){
 // campo de texto.
 let _dashBusca='', _dashSortIdx=-1, _dashSortDir=1, _dashCtx=null;
 // Filtros por coluna (multi-coluna). '' = sem filtro naquela coluna.
-let _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:''};
+let _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:'', mesAnoNF:'', mesAnoCar:''};
 
 // Zera TODOS os filtros/buscas/ordenação — da Dashboard e dos Gráficos.
 // Chamada ao trocar de aba, ao entrar no painel admin e ao sair, para que
@@ -2707,7 +2717,7 @@ let _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:''};
 // garantia se algum dia forem persistidas.)
 function limparTodosFiltros(){
   _dashBusca=''; _dashSortIdx=-1; _dashSortDir=1;
-  _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:''};
+  _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:'', mesAnoNF:'', mesAnoCar:''};
   try{ _grafFiltros={local:'',user:'',tipo:'',ano:''}; }catch(e){}
 }
 
@@ -2725,27 +2735,22 @@ function _dashCasaFiltros(r){
   if(f.conf  && (r.conf||'')!==f.conf) return false;
   if(f.user  && (r.user||'')!==f.user) return false;
   if(f.aplic && (r.aplic||'')!==f.aplic) return false;
+  if(f.mesAnoNF){ const m=/^\d{2}\/(\d{2})\/(\d{4})/.exec(fmtDataBR(r.dataNF)||''); if(!m || (m[2]+'-'+m[1])!==f.mesAnoNF) return false; }
+  if(f.mesAnoCar){ const m=/^\d{2}\/(\d{2})\/(\d{4})/.exec(fmtDataBR(r.dataCarimbo)||''); if(!m || (m[2]+'-'+m[1])!==f.mesAnoCar) return false; }
   return true;
 }
 function _dashTemFiltro(){
   const f=_dashFiltros;
-  return !!(_dashBusca || _dashSortIdx>=0 || f.local||f.tipo||f.conf||f.user||f.aplic);
+  return !!(_dashBusca || _dashSortIdx>=0 || f.local||f.tipo||f.conf||f.user||f.aplic||f.mesAnoNF||f.mesAnoCar);
 }
 // Chamado pelos <select>. Atualiza um filtro e repinta.
-function setFiltroDash(chave, valor){ _dashFiltros[chave]=valor; repintarComContagem(); }
+function setFiltroDash(chave, valor, el){ _focarDash(el); _dashFiltros[chave]=valor; repintarComContagem(); }
 // Repinta a tabela e atualiza o rótulo do botão limpar sem reconstruir tudo
 // (para não perder foco/opção aberta). Mas o botão "limpar" precisa aparecer/
 // sumir — por isso reconstrói os controles quando o estado de "tem filtro" muda.
 function repintarComContagem(){
-  if(_dashCtx && _dashCtx.container){
-    const btn=_dashCtx.container.querySelector('.dash-tools-limpar');
-    const precisa=_dashTemFiltro();
-    if(precisa && !btn || !precisa && btn){
-      // recompõe só a barra de ferramentas
-      renderDashAtual();
-      return;
-    }
-  }
+  // O botão "limpar" vive no host ao lado do título e é atualizado dentro do
+  // pintarTabelaDash — não precisa mais reconstruir a barra inteira.
   pintarTabelaDash();
 }
 
@@ -2762,24 +2767,57 @@ function aplicarBuscaOrdenacao(registros){
 }
 
 // Clique no cabeçalho: alterna a direção na mesma coluna, ou passa para a nova.
-function ordenarDash(idx){
+function ordenarDash(idx, el){
   if(!COLUNAS_DASH[idx] || COLUNAS_DASH[idx].ordf==null) return;
+  _focarDash(el);
   if(_dashSortIdx===idx) _dashSortDir=-_dashSortDir;
   else { _dashSortIdx=idx; _dashSortDir=1; }
   pintarTabelaDash();
 }
 
-function theadDash(comAcoes){
-  return '<thead><tr>'
+function theadDash(comAcoes, registros){
+  const linha1='<tr>'
     + COLUNAS_DASH.map(function(c,i){
         const ativa=_dashSortIdx===i;
         const seta=c.ordf==null ? '' : (ativa ? (_dashSortDir>0?' ▲':' ▼') : ' <span style="opacity:.3">↕</span>');
         const cls=(c.wrap?'col-wrap ':'')+(c.ordf!=null?'th-ord':'');
-        const onc=c.ordf!=null?' onclick="ordenarDash('+i+')"':'';
+        const onc=c.ordf!=null?' onclick="ordenarDash('+i+', this)"':'';
         return '<th class="'+cls+'"'+onc+'>'+c.h+seta+'</th>';
       }).join('')
     + (comAcoes?'<th>Ações</th>':'')
-    + '</tr></thead>';
+    + '</tr>';
+  // Busca ocupa as 3 primeiras colunas (Item, Nº NF, Fornecedor) — é geral, não
+  // filtra uma coluna. Os demais filtros seguem alinhados às suas colunas.
+  const busca='<th colspan="3" class="busca-cell">'
+    + '<input class="dash-busca" type="text" placeholder="🔎 Buscar por NF, fornecedor, MIGO, CC…" '
+    +   'value="'+esc(_dashBusca)+'" oninput="_focarDash(this); _dashBusca=this.value; pintarCorpoDash()" '
+    +   'onkeydown="if(event.key===\'Escape\'){_dashBusca=\'\';this.value=\'\';pintarCorpoDash();}"/></th>';
+  const linha2='<tr class="dash-filtro-row">'
+    + busca
+    + COLUNAS_DASH.slice(3).map(c=>_celulaFiltro(c, registros||[])).join('')
+    + (comAcoes?'<th></th>':'')
+    + '</tr>';
+  // Títulos PRIMEIRO: com table-layout:fixed, é a 1ª linha que define as
+  // larguras das colunas. Assim o colspan da busca (2ª linha) não as bagunça.
+  return '<thead>'+linha1+linha2+'</thead>';
+}
+// Monta a célula de filtro de uma coluna (ou vazia se a coluna não filtra).
+function _celulaFiltro(c, registros){
+  const f=c.filtro;
+  if(!f) return '<th></th>';
+  const atual=_dashFiltros[f.key]||'';
+  if(f.tipo==='mes'){
+    return '<th><input type="month" class="dash-filtro-col" value="'+esc(atual)+'" '
+      +'onchange="setFiltroDash(\''+f.key+'\', this.value, this)" title="Filtrar por mês/ano"/></th>';
+  }
+  let opcoes;
+  if(f.tipo==='pares') opcoes=f.pares;
+  else { const set=new Set(); registros.forEach(r=>{ const v=f.opt(r); if(v) set.add(v); });
+         opcoes=[...set].sort().map(o=>[o,o]); }
+  return '<th><select class="dash-filtro-col" onchange="setFiltroDash(\''+f.key+'\', this.value, this)">'
+    + '<option value="">Todos</option>'
+    + opcoes.map(o=>'<option value="'+esc(o[0])+'"'+(o[0]===atual?' selected':'')+'>'+esc(o[1])+'</option>').join('')
+    + '</select></th>';
 }
 
 // Opções únicas de uma coluna, para montar o <select> do filtro.
@@ -2790,7 +2828,7 @@ function _dashOpcoes(registros, fn){
 }
 function _selFiltro(chave, rotulo, opcoes){
   const atual=_dashFiltros[chave]||'';
-  return '<select class="dash-filtro" onchange="setFiltroDash(\''+chave+'\', this.value)">'
+  return '<select class="dash-filtro" onchange="setFiltroDash(\''+chave+'\', this.value, this)">'
     + '<option value="">'+esc(rotulo)+': todos</option>'
     + opcoes.map(o=>'<option value="'+esc(o)+'"'+(o===atual?' selected':'')+'>'+esc(o)+'</option>').join('')
     + '</select>';
@@ -2807,24 +2845,18 @@ function tabelaDash(registros, idxNoLog){
   const fAplic=[['DIRETA','Direta'],['ESTOQUE','Estoque']];
   const selPar=(chave,rot,pares)=>{
     const atual=_dashFiltros[chave]||'';
-    return '<select class="dash-filtro" onchange="setFiltroDash(\''+chave+'\', this.value)">'
+    return '<select class="dash-filtro" onchange="setFiltroDash(\''+chave+'\', this.value, this)">'
       + '<option value="">'+esc(rot)+': todos</option>'
       + pares.map(pp=>'<option value="'+esc(pp[0])+'"'+(pp[0]===atual?' selected':'')+'>'+esc(pp[1])+'</option>').join('')
       + '</select>';
   };
-  const busca='<div class="dash-tools">'
-    + '<input class="dash-busca" type="text" placeholder="🔎 Buscar por NF, fornecedor, MIGO, CC…" '
-    +   'value="'+esc(_dashBusca)+'" oninput="_dashBusca=this.value; pintarTabelaDash()" '
-    +   'onkeydown="if(event.key===\'Escape\'){_dashBusca=\'\';this.value=\'\';pintarTabelaDash();}"/>'
-    + _selFiltro('local','Local', _dashOpcoes(registros, r=>normalizeLocalNome(r.local)))
-    + selPar('tipo','Tipo', fTipo)
-    + selPar('conf','Conf.', fConf)
-    + selPar('aplic','Aplic.', fAplic)
-    + _selFiltro('user','User', _dashOpcoes(registros, r=>r.user))
-    + '<span class="dash-tools-count"></span>'
-    + (_dashTemFiltro() ? '<button class="dash-tools-limpar" onclick="limparBuscaDash()">limpar filtros</button>' : '')
-    + '</div>';
-  return busca + '<div class="dash-tbl-host"></div>';
+  // Meses (01..12) e anos presentes na coluna de data indicada.
+  const MES=[['01','Jan'],['02','Fev'],['03','Mar'],['04','Abr'],['05','Mai'],['06','Jun'],['07','Jul'],['08','Ago'],['09','Set'],['10','Out'],['11','Nov'],['12','Dez']];
+  const anosDe=campoData=>{ const set=new Set();
+    registros.forEach(r=>{ const m=/^\d{2}\/\d{2}\/(\d{4})/.exec(fmtDataBR(r[campoData])||''); if(m) set.add(m[1]); });
+    return [...set].sort().map(a=>[a,a]); };
+  // A busca e os filtros vivem no cabeçalho da tabela (ver theadDash).
+  return '<div class="dash-tbl-host"></div>';
 }
 
 // Guarda o que tabelaDash montou, até o host existir no DOM.
@@ -2832,8 +2864,17 @@ let _dashPendente=null;
 // O caller chama isto DEPOIS de inserir o html no seu container.
 function ativarDashTabela(container){
   if(!_dashPendente) return;
+  // Guarda os dados NO próprio container: há dois dashboards (inline e admin)
+  // e cada um precisa saber os seus registros. Sem isso, _dashCtx (global)
+  // apontava para o último renderizado e a busca de um caía no outro.
+  container._dashData={ registros:_dashPendente.registros, idxNoLog:_dashPendente.idxNoLog };
   _dashCtx={ container:container, registros:_dashPendente.registros, idxNoLog:_dashPendente.idxNoLog };
   pintarTabelaDash();
+}
+// Aponta _dashCtx para o dashboard onde está o elemento que o usuário mexeu.
+function _focarDash(el){
+  const c=el && el.closest ? el.closest('#inline-dash-content, #admin-dash-content') : null;
+  if(c && c._dashData){ _dashCtx={ container:c, registros:c._dashData.registros, idxNoLog:c._dashData.idxNoLog }; }
 }
 // Redesenha a dashboard atualmente montada (para o botão "limpar" aparecer/sumir).
 function renderDashAtual(){
@@ -2843,7 +2884,7 @@ function renderDashAtual(){
 
 function limparBuscaDash(){
   _dashBusca=''; _dashSortIdx=-1; _dashSortDir=1;
-  _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:''};
+  _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:'', mesAnoNF:'', mesAnoCar:''};
   renderDashAtual();
 }
 
@@ -2856,19 +2897,27 @@ function pintarTabelaDash(){
   const idxNoLog=_dashCtx.idxNoLog;
   const comAcoes=typeof idxNoLog==='function';
   const lista=aplicarBuscaOrdenacao(_dashCtx.registros);
-  const cont=_dashCtx.container.querySelector('.dash-tools-count');
-  if(cont) cont.textContent = lista.length===_dashCtx.registros.length
-    ? lista.length+' registro(s)'
-    : lista.length+' de '+_dashCtx.registros.length;
+  // "limpar filtros" fica ao lado do título "Registro de NFs Carimbadas",
+  // e só aparece quando há filtro/busca/ordenação ativos.
+  const lh=_dashCtx.container.querySelector('.dash-limpar-host');
+  if(lh) lh.innerHTML = _dashTemFiltro()
+    ? '<button class="dash-tools-limpar" onclick="limparBuscaDash()">↺ limpar filtros</button>' : '';
   // Cards refletem os filtros: recomputa a partir da lista já filtrada.
   const ch=_dashCtx.container.querySelector('.dash-cards-host');
   if(ch) ch.innerHTML=cardsMetricas(lista);
 
+  const ncols=13+(comAcoes?1:0);
+  host.innerHTML='<div id="log-table-wrap"><table id="log-table">'
+    + theadDash(comAcoes, _dashCtx.registros)
+    + '<tbody>'+_linhasDash(lista, comAcoes, idxNoLog, ncols)+'</tbody></table></div>';
+}
+
+// Monta só as <tr> do corpo (usado pelo pintar completo e pelo corpo-só).
+function _linhasDash(lista, comAcoes, idxNoLog, ncols){
   if(!lista.length){
-    host.innerHTML='<div class="no-data" style="margin-top:10px;">Nenhum registro corresponde à busca.</div>';
-    return;
+    return '<tr><td colspan="'+ncols+'"><div class="no-data" style="margin:10px 0;">Nenhum registro corresponde à busca.</div></td></tr>';
   }
-  const linhas=lista.map(function(r,i){
+  return lista.map(function(r,i){
     const lt=r.leadTime!=null?r.leadTime:'–';
     const ltCls=typeof lt==='number'?(lt<=3?'lt-ok':lt<=7?'lt-warn':'lt-bad'):'';
     const cb=r.conf==='SIM'?'badge-on':r.conf==='NAO'?'badge-off':'badge-admin';
@@ -2897,7 +2946,23 @@ function pintarTabelaDash(){
       +acoes
       +'</tr>';
   }).join('');
-  host.innerHTML='<div id="log-table-wrap"><table id="log-table">'+theadDash(comAcoes)+'<tbody>'+linhas+'</tbody></table></div>';
+}
+
+// Atualiza SÓ o corpo da tabela (e cards + limpar), sem tocar no cabeçalho.
+// É o que a BUSCA usa: a caixa de busca vive no cabeçalho, e reconstruí-lo a
+// cada tecla faria o campo perder o foco.
+function pintarCorpoDash(){
+  if(!_dashCtx || !_dashCtx.container) return;
+  const tb=_dashCtx.container.querySelector('#log-table tbody');
+  if(!tb){ pintarTabelaDash(); return; }
+  const comAcoes=typeof _dashCtx.idxNoLog==='function';
+  const lista=aplicarBuscaOrdenacao(_dashCtx.registros);
+  tb.innerHTML=_linhasDash(lista, comAcoes, _dashCtx.idxNoLog, 13+(comAcoes?1:0));
+  const ch=_dashCtx.container.querySelector('.dash-cards-host');
+  if(ch) ch.innerHTML=cardsMetricas(lista);
+  const lh=_dashCtx.container.querySelector('.dash-limpar-host');
+  if(lh) lh.innerHTML = _dashTemFiltro()
+    ? '<button class="dash-tools-limpar" onclick="limparBuscaDash()">↺ limpar filtros</button>' : '';
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────────
@@ -2929,23 +2994,9 @@ function renderAdminDash(){
       <div class="dash-icon">${c.icon}</div>
     </div>`).join('')}</div>`;
 
-  // Filtro de local (só admin vê todos)
-  const todosLocais=getLocais();
-  const filtroHtml=SESSION&&SESSION.tipo==='Administrador'&&todosLocais.length>1?
-    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-      <span style="font-size:11px;font-weight:700;color:var(--grey-m);">Filtrar por Local:</span>
-      <select id="dash-filtro-local" onchange="renderAdminDash()" style="font-size:11px;padding:4px 8px;border:1px solid var(--grey-l);border-radius:4px;">
-        <option value="">Todos os locais</option>
-        ${todosLocais.map(l=>`<option value="${esc(l.id)}">${esc(l.nome)}</option>`).join('')}
-      </select>
-    </div>`:'';
-
-  // Filtrar log pelo local selecionado (se admin e filtro ativo)
-  const filtroLocalId=document.getElementById('dash-filtro-local')?.value||'';
-  const filtroLocalNome=filtroLocalId?getLocalNome(filtroLocalId):'';
-  const logFiltrado=filtroLocalNome?log.filter(r=>normalizeLocalNome(r.local)===filtroLocalNome):log;
-
-  html+=filtroHtml;
+  // O antigo "Filtrar por Local" foi removido: o filtro de Local na própria
+  // tabela (linha de filtros) já faz o mesmo.
+  const logFiltrado=log;
   const totalF=logFiltrado.length;
   const simF=logFiltrado.filter(r=>r.conf==='SIM').length;
   const naoF=logFiltrado.filter(r=>r.conf==='NAO').length;
@@ -2962,9 +3013,9 @@ function renderAdminDash(){
     {label:'Serviços',val:servF,sub:pctF(servF)+'% do total',cls:'c-gold',icon:'🔧'},
     {label:'Lead Time Médio',val:avgLtF,sub:'dias (NF → carimbo)',cls:'c-blue',icon:'⏱'},
   ];
-  html='<div class="dash-cards-host">'+cardsMetricas(logFiltrado)+'</div>'+filtroHtml;
+  html='<div class="dash-cards-host">'+cardsMetricas(logFiltrado)+'</div>';
 
-  html+=`<div class="section-hdr">Registro de NFs Carimbadas (${logFiltrado.length}${filtroLocalNome?' — '+filtroLocalNome:''})</div>`;
+  html+=`<div class="section-hdr sec-hdr-flex">Registro de NFs Carimbadas (${logFiltrado.length}) <span class="dash-limpar-host"></span></div>`;
   // Usar logFiltrado na tabela
   const logParaTabela=logFiltrado;
   if(!log.length){
@@ -3116,15 +3167,38 @@ async function excluirLogEntry(idx){
 
 // Limpar todos os registros
 async function limparTodosRegistros(){
-  const n=getLog().length;
-  if(!n){ showToast('Não há registros para excluir.'); return; }
+  const todos=getLog();
+  if(!todos.length){ showToast('Não há registros para excluir.'); return; }
+  // Respeita os filtros ATIVOS: exclui só os registros que correspondem à busca
+  // e aos filtros de coluna. Sem filtro, corresponde a todos.
+  const paraExcluir=todos.filter(r=>_dashCasaBusca(r, _dashBusca) && _dashCasaFiltros(r));
+  const n=paraExcluir.length;
+  if(!n){ showToast('Nenhum registro corresponde ao filtro atual.'); return; }
+  const tudo = n===todos.length;
   if(!await confirmarApp({
-    titulo:'Excluir TODOS os registros',
-    texto:'Excluir os '+n+' registro(s) da Dashboard?',
+    titulo: tudo ? 'Excluir TODOS os registros' : 'Excluir registros filtrados',
+    texto: tudo ? 'Excluir os '+n+' registro(s)?'
+                : 'Excluir os '+n+' registro(s) que correspondem ao filtro atual?',
     aviso:'⚠ Esta ação <strong>não pode ser desfeita</strong> e é sincronizada: '
-         +'os registros somem de todas as máquinas, não só desta.',
-    ok:'Excluir os '+n, perigo:true
+         +'os registros somem de todas as máquinas.'
+         + (tudo?'':'<br>Os demais '+(todos.length-n)+' registro(s) permanecem.'),
+    ok:'Excluir '+n, perigo:true
   })) return;
+
+  // ── Exclusão PARCIAL (há filtro): remove só os filtrados ──
+  if(!tudo){
+    const alvo=new Set(paraExcluir);
+    const restantes=todos.filter(r=>!alvo.has(r));
+    // saveLog detecta os ids removidos e cria as lápides → sincroniza a exclusão.
+    saveLog(restantes);
+    renderAdminDash(); renderInlineDash();
+    const semId=paraExcluir.filter(r=>!r.id).length;
+    showToast('✅ '+n+' registro(s) excluído(s).'
+      + (semId?' ⚠ '+semId+' antigo(s) sem id podem voltar no sync — reimporte a base se persistir.':''));
+    return;
+  }
+
+  // ── Exclusão TOTAL (sem filtro): wipe autoritativo no servidor ──
   if(!APPS_SCRIPT_URL){
     showToast('⚠ Sincronização não configurada — não é possível limpar com segurança.');
     return;
@@ -3685,13 +3759,13 @@ function renderGraficos(){
         [['#E0342B','Crítico','0 - 69%'],['#F4C20D','Atenção','70 - 89%'],['#3CA83C','Conforme','90 - 100%']])
     + svgBarrasVert('Notas Carimbadas por Mês', porMes)
     + svgLinha('Lead Time Médio por Mês (dias)', ltMes, '#4D6FB5', 'dias')
-    + rankLista('Top 10 Fornecedores', _grafConta(log, r=>r.forn||'—').slice(0,10))
+    + rankLista('Top 10 Fornecedores (Qtd de Notas)', _grafConta(log, r=>r.forn||'—').slice(0,10))
     + '</div>'
     + '<div class="graf-grid graf-grid-5">'
     + svgBarras('Notas por Local', _grafConta(log, r=>normalizeLocalNome(r.local)||'—'))
-    + svgBarras('Notas por Usuário', _grafConta(log, r=>r.user||'—'))
     + svgPizza('Distribuição por Tipo', tipo)
     + svgBarras('Aplicação', aplic)
+    + svgBarras('Notas por Usuário', _grafConta(log, r=>r.user||'—'))
     + barrasPct('Conformidade por Usuário', _confPorUser(log))
     + '</div>'
     + '<div class="graf-rodape">ℹ Lead time calculado entre a data da NF e a data do carimbo.</div>';
@@ -3913,7 +3987,7 @@ function renderInlineDash(){
   // Os cards ficam num host próprio para o filtro/busca recalculá-los sem
   // reconstruir a página. cardsMetricas(log) é a versão inicial (sem filtro).
   let html='<div class="dash-cards-host">'+cardsMetricas(log)+'</div>';
-  html+='<div class="section-hdr" style="max-width:none;">Registro de NFs Carimbadas</div>';
+  html+='<div class="section-hdr sec-hdr-flex" style="max-width:none;">Registro de NFs Carimbadas <span class="dash-limpar-host"></span></div>';
   if(!log.length){
     // Distinguir "não há nada" de "há, mas você não enxerga": antes as duas
     // situações mostravam a mesma frase e o usuário não tinha como saber que
