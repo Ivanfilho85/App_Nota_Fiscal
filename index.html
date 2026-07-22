@@ -184,6 +184,50 @@ html,body{height:100%;font-family:var(--font);background:var(--grey-xl);color:va
 .badge-on{background:#D1FAE5;color:#065F46;}
 .badge-off{background:#FEE2E2;color:#991B1B;}
 .act-btn{background:none;border:none;cursor:pointer;font-size:11px;font-weight:700;padding:4px 8px;border-radius:4px;transition:background .12s;}
+/* ── Ferramentas da Dashboard (busca + ordenação) ── */
+.dash-tools{display:flex;align-items:center;gap:10px;margin:6px 0 10px;flex-wrap:wrap;}
+.dash-busca{flex:1;min-width:220px;max-width:420px;padding:7px 12px;font-size:12px;border:1px solid var(--grey-l);border-radius:6px;font-family:var(--font);outline:none;transition:border-color .12s;}
+.dash-busca:focus{border-color:var(--blue);}
+.dash-tools-count{font-size:11px;color:var(--grey-m);font-weight:600;}
+.dash-tools-limpar{background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:700;text-decoration:underline;padding:2px 4px;}
+.dash-filtro{font-size:11px;padding:5px 8px;border:1px solid var(--grey-l);border-radius:6px;background:var(--white);color:var(--dark);font-family:var(--font);cursor:pointer;max-width:150px;}
+.dash-filtro:focus{outline:none;border-color:var(--blue);}
+#log-table th.th-ord{cursor:pointer;user-select:none;white-space:nowrap;}
+#log-table th.th-ord:hover{background:var(--blue-xl);}
+/* ── Gráficos ── */
+.graf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;align-items:stretch;margin-bottom:16px;}
+.graf-card{background:var(--white);border-radius:var(--radius-l);box-shadow:var(--shadow);padding:16px 18px;min-width:0;overflow:hidden;}
+.graf-card-tt{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--grey-m);margin-bottom:12px;}
+.graf-vazio{color:var(--grey-m);font-size:12px;padding:20px 0;text-align:center;}
+.graf-pizza-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.graf-leg{font-size:12px;line-height:1.9;}
+.graf-leg-item{white-space:nowrap;}
+.graf-leg-cor{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:middle;}
+.graf-barras{display:flex;flex-direction:column;gap:7px;}
+.graf-bar-row{display:flex;align-items:center;gap:8px;font-size:12px;}
+.graf-bar-lbl{flex:0 0 34%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--dark);}
+.graf-bar-track{flex:1;background:var(--grey-xl);border-radius:4px;height:16px;overflow:hidden;}
+.graf-bar-fill{height:100%;border-radius:4px;transition:width .3s ease;}
+.graf-bar-val{flex:0 0 auto;font-weight:700;color:var(--dark);min-width:22px;text-align:right;}
+.graf-filtros{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.graf-filtros-tt{font-size:11px;font-weight:700;color:var(--grey-m);}
+.graf-filtros-n{font-size:11px;color:var(--grey-m);margin-left:auto;}
+.graf-grid-4{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
+.graf-grid-5{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+.graf-rodape{font-size:11px;color:var(--grey-m);margin-top:14px;padding-left:2px;}
+.rank-list{display:flex;flex-direction:column;gap:6px;}
+.rank-row{display:flex;align-items:center;gap:8px;font-size:12px;}
+.rank-n{flex:0 0 20px;height:20px;line-height:20px;text-align:center;border-radius:50%;background:var(--grey-xl);color:var(--grey-m);font-weight:700;font-size:10px;}
+.rank-lbl{flex:0 0 40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--dark);}
+.rank-bar{flex:1;background:var(--grey-xl);border-radius:4px;height:12px;overflow:hidden;}
+.rank-fill{display:block;height:100%;background:#4D6FB5;border-radius:4px;}
+.rank-val{flex:0 0 auto;font-weight:700;color:var(--dark);min-width:18px;text-align:right;}
+.velo-leg{display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:6px;background:var(--grey-xl);border-radius:8px;padding:10px 6px;margin-top:8px;}
+.velo-leg-i{flex:1 1 0;justify-content:center;min-width:90px;}
+.velo-leg-i{display:flex;align-items:center;gap:6px;font-size:11px;}
+.velo-leg-dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;}
+.velo-leg-t{font-weight:700;color:var(--dark);line-height:1.1;}
+.velo-leg-r{color:var(--grey-m);font-size:10px;}
 .act-btn-edit{color:var(--blue);}.act-btn-edit:hover{background:var(--blue-l);}
 .act-btn-del{color:var(--danger);}.act-btn-del:hover{background:#FEE2E2;}
 .act-btn-mail{color:var(--blue);border-color:var(--blue);}.act-btn-mail:hover{background:var(--blue-l);}
@@ -1261,6 +1305,7 @@ textarea{resize:vertical;min-height:46px;}
         <button class="vtab active" id="vtab-viewer"  onclick="switchVTab('viewer',this)">📄 Visualizador</button>
         <button class="vtab"        id="vtab-fila"    onclick="switchVTab('fila',this)">📥 NF em Lote <span id="fila-badge" style="background:var(--gold);color:var(--dark);border-radius:10px;padding:0 6px;font-size:10px;margin-left:4px;display:none;">0</span></button>
         <button class="vtab"        id="vtab-dash"    onclick="switchVTab('dash',this)">📊 Dashboard</button>
+        <button class="vtab"        id="vtab-graf"    onclick="switchVTab('graf',this)">📈 Gráficos</button>
       </div>
       <div id="viewer-toolbar" style="display:none;">
         <button class="nav-btn" id="btn-prev" onclick="changePg(-1)" disabled>◀</button>
@@ -1311,6 +1356,11 @@ textarea{resize:vertical;min-height:46px;}
       <!-- Dashboard inline -->
       <div id="dash-panel" style="display:none;flex:1;overflow-y:auto;padding:20px;background:var(--grey-xl);">
         <div id="inline-dash-content"></div>
+      </div>
+
+      <!-- Gráficos -->
+      <div id="graf-panel" style="display:none;flex:1;overflow-y:auto;padding:20px;background:var(--grey-xl);">
+        <div id="graf-content"></div>
       </div>
     </main>
   </div>
@@ -2146,6 +2196,7 @@ async function confirmarTrocaSenha(){
   showToast('✔ Senha definida! Bem-vindo(a), '+SESSION.nome.split(' ')[0]+'!');
 }
 function doLogout(){
+  limparTodosFiltros();
   pararPullAutomatico();   // sem sessão não há o que sincronizar
   SESSION=null;
   clearSession();
@@ -2584,6 +2635,7 @@ function expForcarTexto(ws, col, linIni, n){
 }
 
 function goAdmin(){
+  limparTodosFiltros();
   document.getElementById('admin-screen').style.display='flex';
   document.getElementById('admin-screen').style.flexDirection='column';
   try{ sessionStorage.setItem('me_nf_screen','admin'); }catch(e){}
@@ -2600,6 +2652,7 @@ function goApp(){
   if(vtv) switchVTab('viewer', vtv);
 }
 function adminTab(idx,el){
+  limparTodosFiltros();
   document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
@@ -2615,29 +2668,207 @@ function adminTab(idx,el){
 // Antes existiam duas implementações da mesma tabela — uma com template
 // literals (admin) e outra com concatenação (inline). Elas divergiam a cada
 // coluna nova. Agora as duas telas chamam tabelaDash().
+// Cada coluna: título + como extrair o valor para ORDENAR. 'ordf' null =
+// coluna não ordenável (Item, que é só a posição na lista).
 const COLUNAS_DASH=[
-  {h:'#'},               {h:'Nº NF'},          {h:'Fornecedor', wrap:true},
-  {h:'Data NF'},         {h:'Data Carimbo'},   {h:'Lead Time'},
-  {h:'Local', wrap:true},{h:'Centro de Custo'},{h:'Tipo'},
-  {h:'Aplicação'},       {h:'Conformidade'},   {h:'MIGO'},   {h:'USER'},
+  {h:'Item', ordf:null},
+  {h:'Nº NF',           ordf:r=>padNF9(r.nfNum)},
+  {h:'Fornecedor', wrap:true, ordf:r=>(r.forn||'').toLowerCase()},
+  {h:'Data NF',         ordf:r=>dataParaOrdenar(r.dataNF)},
+  {h:'Data Carimbo',    ordf:r=>dataParaOrdenar(r.dataCarimbo)},
+  {h:'Lead Time',       ordf:r=>(r.leadTime==null?-Infinity:r.leadTime)},
+  {h:'Local', wrap:true, ordf:r=>normalizeLocalNome(r.local||'').toLowerCase()},
+  {h:'Centro de Custo', ordf:r=>parseCC(r.cc||'')},
+  {h:'Tipo',            ordf:r=>(r.tipo||'')},
+  {h:'Aplicação',       ordf:r=>(r.aplic||'')},
+  {h:'Conformidade',    ordf:r=>(r.conf||'')},
+  {h:'MIGO',            ordf:r=>(r.migo||'')},
+  {h:'USER',            ordf:r=>(r.user||'').toLowerCase()},
 ];
+
+// dd/mm/aaaa -> aaaammdd (número) para ordenar data como data, não como texto.
+function dataParaOrdenar(v){
+  const m=/^(\d{2})\/(\d{2})\/(\d{4})/.exec(fmtDataBR(v)||'');
+  return m ? Number(m[3]+m[2]+m[1]) : -1;
+}
+
+// Estado da busca/ordenação — global porque as DUAS dashboards (inline e
+// admin) compartilham a mesma tabela. _dashCtx guarda a lista atual e onde
+// pintá-la, para a busca redesenhar só o corpo da tabela sem perder o foco do
+// campo de texto.
+let _dashBusca='', _dashSortIdx=-1, _dashSortDir=1, _dashCtx=null;
+// Filtros por coluna (multi-coluna). '' = sem filtro naquela coluna.
+let _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:''};
+
+// Zera TODOS os filtros/buscas/ordenação — da Dashboard e dos Gráficos.
+// Chamada ao trocar de aba, ao entrar no painel admin e ao sair, para que
+// nenhuma tela herde o filtro deixado em outra. (No F5 as variáveis já
+// nascem vazias, pois o script recarrega — mas chamamos mesmo assim por
+// garantia se algum dia forem persistidas.)
+function limparTodosFiltros(){
+  _dashBusca=''; _dashSortIdx=-1; _dashSortDir=1;
+  _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:''};
+  try{ _grafFiltros={local:'',user:'',tipo:'',ano:''}; }catch(e){}
+}
+
+// Busca livre: casa em Nº NF, fornecedor, MIGO, centro de custo, local e user.
+function _dashCasaBusca(r, termo){
+  if(!termo) return true;
+  const alvo=[padNF9(r.nfNum), r.forn, r.migo, r.cc, normalizeLocalNome(r.local), r.user]
+    .map(x=>String(x==null?'':x).toLowerCase()).join(' ');
+  return termo.toLowerCase().split(/\s+/).filter(Boolean).every(t=>alvo.indexOf(t)>=0);
+}
+function _dashCasaFiltros(r){
+  const f=_dashFiltros;
+  if(f.local && normalizeLocalNome(r.local)!==f.local) return false;
+  if(f.tipo  && (r.tipo||'')!==f.tipo) return false;
+  if(f.conf  && (r.conf||'')!==f.conf) return false;
+  if(f.user  && (r.user||'')!==f.user) return false;
+  if(f.aplic && (r.aplic||'')!==f.aplic) return false;
+  return true;
+}
+function _dashTemFiltro(){
+  const f=_dashFiltros;
+  return !!(_dashBusca || _dashSortIdx>=0 || f.local||f.tipo||f.conf||f.user||f.aplic);
+}
+// Chamado pelos <select>. Atualiza um filtro e repinta.
+function setFiltroDash(chave, valor){ _dashFiltros[chave]=valor; repintarComContagem(); }
+// Repinta a tabela e atualiza o rótulo do botão limpar sem reconstruir tudo
+// (para não perder foco/opção aberta). Mas o botão "limpar" precisa aparecer/
+// sumir — por isso reconstrói os controles quando o estado de "tem filtro" muda.
+function repintarComContagem(){
+  if(_dashCtx && _dashCtx.container){
+    const btn=_dashCtx.container.querySelector('.dash-tools-limpar');
+    const precisa=_dashTemFiltro();
+    if(precisa && !btn || !precisa && btn){
+      // recompõe só a barra de ferramentas
+      renderDashAtual();
+      return;
+    }
+  }
+  pintarTabelaDash();
+}
+
+function aplicarBuscaOrdenacao(registros){
+  let arr=registros.filter(r=>_dashCasaBusca(r, _dashBusca) && _dashCasaFiltros(r));
+  const col=COLUNAS_DASH[_dashSortIdx];
+  if(col && col.ordf){
+    arr.sort((a,b)=>{ const x=col.ordf(a), y=col.ordf(b);
+      if(x<y) return -1*_dashSortDir; if(x>y) return 1*_dashSortDir; return 0; });
+  } else {
+    arr.reverse();   // sem ordenação escolhida: mais recentes no topo, como antes
+  }
+  return arr;
+}
+
+// Clique no cabeçalho: alterna a direção na mesma coluna, ou passa para a nova.
+function ordenarDash(idx){
+  if(!COLUNAS_DASH[idx] || COLUNAS_DASH[idx].ordf==null) return;
+  if(_dashSortIdx===idx) _dashSortDir=-_dashSortDir;
+  else { _dashSortIdx=idx; _dashSortDir=1; }
+  pintarTabelaDash();
+}
 
 function theadDash(comAcoes){
   return '<thead><tr>'
-    + COLUNAS_DASH.map(c=>'<th'+(c.wrap?' class="col-wrap"':'')+'>'+c.h+'</th>').join('')
+    + COLUNAS_DASH.map(function(c,i){
+        const ativa=_dashSortIdx===i;
+        const seta=c.ordf==null ? '' : (ativa ? (_dashSortDir>0?' ▲':' ▼') : ' <span style="opacity:.3">↕</span>');
+        const cls=(c.wrap?'col-wrap ':'')+(c.ordf!=null?'th-ord':'');
+        const onc=c.ordf!=null?' onclick="ordenarDash('+i+')"':'';
+        return '<th class="'+cls+'"'+onc+'>'+c.h+seta+'</th>';
+      }).join('')
     + (comAcoes?'<th>Ações</th>':'')
     + '</tr></thead>';
 }
 
-// registros: o que será exibido (pode estar filtrado).
-// idxNoLog: função que devolve o índice do registro no log COMPLETO — só o
-// painel admin passa. É por isso que Editar/Excluir funcionam mesmo com um
-// filtro de local ativo (antes o índice era o da lista filtrada: editava o
-// registro errado).
+// Opções únicas de uma coluna, para montar o <select> do filtro.
+function _dashOpcoes(registros, fn){
+  const set=new Set();
+  registros.forEach(r=>{ const v=fn(r); if(v) set.add(v); });
+  return [...set].sort();
+}
+function _selFiltro(chave, rotulo, opcoes){
+  const atual=_dashFiltros[chave]||'';
+  return '<select class="dash-filtro" onchange="setFiltroDash(\''+chave+'\', this.value)">'
+    + '<option value="">'+esc(rotulo)+': todos</option>'
+    + opcoes.map(o=>'<option value="'+esc(o)+'"'+(o===atual?' selected':'')+'>'+esc(o)+'</option>').join('')
+    + '</select>';
+}
+
+// Monta o bloco: busca + filtros por coluna + host da tabela. A tabela em si é
+// pintada por pintarTabelaDash(). Guarda o CONTAINER em _dashCtx porque há dois
+// blocos iguais no DOM (inline e admin) — sem o escopo, pintarTabelaDash caía
+// no host errado (o do admin, invisível) e a tabela visível ficava vazia.
 function tabelaDash(registros, idxNoLog){
+  _dashPendente={ registros:registros, idxNoLog:idxNoLog };
+  const fTipo=[['PECAS','Peças/Mat.'],['SERVICOS','Serviços']];
+  const fConf=[['SIM','SIM'],['NAO','NÃO']];
+  const fAplic=[['DIRETA','Direta'],['ESTOQUE','Estoque']];
+  const selPar=(chave,rot,pares)=>{
+    const atual=_dashFiltros[chave]||'';
+    return '<select class="dash-filtro" onchange="setFiltroDash(\''+chave+'\', this.value)">'
+      + '<option value="">'+esc(rot)+': todos</option>'
+      + pares.map(pp=>'<option value="'+esc(pp[0])+'"'+(pp[0]===atual?' selected':'')+'>'+esc(pp[1])+'</option>').join('')
+      + '</select>';
+  };
+  const busca='<div class="dash-tools">'
+    + '<input class="dash-busca" type="text" placeholder="🔎 Buscar por NF, fornecedor, MIGO, CC…" '
+    +   'value="'+esc(_dashBusca)+'" oninput="_dashBusca=this.value; pintarTabelaDash()" '
+    +   'onkeydown="if(event.key===\'Escape\'){_dashBusca=\'\';this.value=\'\';pintarTabelaDash();}"/>'
+    + _selFiltro('local','Local', _dashOpcoes(registros, r=>normalizeLocalNome(r.local)))
+    + selPar('tipo','Tipo', fTipo)
+    + selPar('conf','Conf.', fConf)
+    + selPar('aplic','Aplic.', fAplic)
+    + _selFiltro('user','User', _dashOpcoes(registros, r=>r.user))
+    + '<span class="dash-tools-count"></span>'
+    + (_dashTemFiltro() ? '<button class="dash-tools-limpar" onclick="limparBuscaDash()">limpar filtros</button>' : '')
+    + '</div>';
+  return busca + '<div class="dash-tbl-host"></div>';
+}
+
+// Guarda o que tabelaDash montou, até o host existir no DOM.
+let _dashPendente=null;
+// O caller chama isto DEPOIS de inserir o html no seu container.
+function ativarDashTabela(container){
+  if(!_dashPendente) return;
+  _dashCtx={ container:container, registros:_dashPendente.registros, idxNoLog:_dashPendente.idxNoLog };
+  pintarTabelaDash();
+}
+// Redesenha a dashboard atualmente montada (para o botão "limpar" aparecer/sumir).
+function renderDashAtual(){
+  if(_dashCtx && _dashCtx.container && _dashCtx.container.id==='admin-dash-content') renderAdminDash();
+  else renderInlineDash();
+}
+
+function limparBuscaDash(){
+  _dashBusca=''; _dashSortIdx=-1; _dashSortDir=1;
+  _dashFiltros={local:'', tipo:'', conf:'', user:'', aplic:''};
+  renderDashAtual();
+}
+
+// Pinta SÓ o corpo da tabela dentro do host — escopado ao container em
+// _dashCtx, nunca ao primeiro .dash-tbl-host do documento.
+function pintarTabelaDash(){
+  if(!_dashCtx || !_dashCtx.container) return;
+  const host=_dashCtx.container.querySelector('.dash-tbl-host');
+  if(!host) return;
+  const idxNoLog=_dashCtx.idxNoLog;
   const comAcoes=typeof idxNoLog==='function';
-  const n=registros.length;
-  const linhas=registros.slice().reverse().map(function(r,i){
+  const lista=aplicarBuscaOrdenacao(_dashCtx.registros);
+  const cont=_dashCtx.container.querySelector('.dash-tools-count');
+  if(cont) cont.textContent = lista.length===_dashCtx.registros.length
+    ? lista.length+' registro(s)'
+    : lista.length+' de '+_dashCtx.registros.length;
+  // Cards refletem os filtros: recomputa a partir da lista já filtrada.
+  const ch=_dashCtx.container.querySelector('.dash-cards-host');
+  if(ch) ch.innerHTML=cardsMetricas(lista);
+
+  if(!lista.length){
+    host.innerHTML='<div class="no-data" style="margin-top:10px;">Nenhum registro corresponde à busca.</div>';
+    return;
+  }
+  const linhas=lista.map(function(r,i){
     const lt=r.leadTime!=null?r.leadTime:'–';
     const ltCls=typeof lt==='number'?(lt<=3?'lt-ok':lt<=7?'lt-warn':'lt-bad'):'';
     const cb=r.conf==='SIM'?'badge-on':r.conf==='NAO'?'badge-off':'badge-admin';
@@ -2650,7 +2881,7 @@ function tabelaDash(registros, idxNoLog){
         +'</td>';
     }
     return '<tr>'
-      +'<td>'+(n-i)+'</td>'
+      +'<td>'+(i+1)+'</td>'
       +'<td>'+esc(r.nfNum?padNF9(r.nfNum):'–')+'</td>'
       +'<td class="col-wrap">'+esc(r.forn||'–')+'</td>'
       +'<td>'+esc(fmtDataBR(r.dataNF)||'–')+'</td>'
@@ -2666,7 +2897,7 @@ function tabelaDash(registros, idxNoLog){
       +acoes
       +'</tr>';
   }).join('');
-  return '<div id="log-table-wrap"><table id="log-table">'+theadDash(comAcoes)+'<tbody>'+linhas+'</tbody></table></div>';
+  host.innerHTML='<div id="log-table-wrap"><table id="log-table">'+theadDash(comAcoes)+'<tbody>'+linhas+'</tbody></table></div>';
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────────
@@ -2731,13 +2962,7 @@ function renderAdminDash(){
     {label:'Serviços',val:servF,sub:pctF(servF)+'% do total',cls:'c-gold',icon:'🔧'},
     {label:'Lead Time Médio',val:avgLtF,sub:'dias (NF → carimbo)',cls:'c-blue',icon:'⏱'},
   ];
-  html=`<div class="dash-grid">${cardsF.map(c=>`
-    <div class="dash-card ${c.cls}">
-      <div class="dash-label">${c.label}</div>
-      <div class="dash-value">${c.val}</div>
-      <div class="dash-sub">${c.sub}</div>
-      <div class="dash-icon">${c.icon}</div>
-    </div>`).join('')}</div>`+filtroHtml;
+  html='<div class="dash-cards-host">'+cardsMetricas(logFiltrado)+'</div>'+filtroHtml;
 
   html+=`<div class="section-hdr">Registro de NFs Carimbadas (${logFiltrado.length}${filtroLocalNome?' — '+filtroLocalNome:''})</div>`;
   // Usar logFiltrado na tabela
@@ -2747,7 +2972,9 @@ function renderAdminDash(){
   } else {
     html+=tabelaDash(logParaTabela, r=>log.indexOf(r));
   }
-  document.getElementById('admin-dash-content').innerHTML=html;
+  const _cAdmin=document.getElementById('admin-dash-content');
+  _cAdmin.innerHTML=html;
+  ativarDashTabela(_cAdmin);
 }
 
 // ─── EDIÇÃO MODAL DO LOG ─────────────────────────────────────────
@@ -3269,6 +3496,7 @@ function onCCChange(){
 }
 // ─── SWITCH TABS VIEWER ───────────────────────────────────────────
 function switchVTab(tab,el){
+  limparTodosFiltros();   // cada aba começa sem filtro herdado da anterior
   document.querySelectorAll('.vtab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   // Memoriza a aba ativa para mantê-la ao atualizar (F5) na mesma sessão.
@@ -3282,6 +3510,7 @@ function switchVTab(tab,el){
   // Painéis alternativos
   const dp = document.getElementById('dash-panel');
   const fp = document.getElementById('fila-panel');
+  const gp0 = document.getElementById('graf-panel');
   // Sidebar — visível APENAS na aba visualizador
   const sidebar = document.getElementById('sidebar');
 
@@ -3292,6 +3521,7 @@ function switchVTab(tab,el){
   if(vs) vs.style.display = 'none';
   if(dp) dp.style.display = 'none';
   if(fp) fp.style.display = 'none';
+  if(gp0) gp0.style.display = 'none';
 
   if(tab === 'viewer'){
     // Sidebar visível
@@ -3314,29 +3544,375 @@ function switchVTab(tab,el){
     } else if(tab === 'fila'){
       if(fp){ fp.style.display = 'flex'; fp.style.flexDirection = 'column'; }
       filaRender();
+    } else if(tab === 'graf'){
+      const gp=document.getElementById('graf-panel');
+      if(gp){ gp.style.display = 'flex'; gp.style.flexDirection = 'column'; }
+      renderGraficos();
     }
   }
 }
 // ─── DASHBOARD INLINE ─────────────────────────────────────────────
+// ─── GRÁFICOS (SVG, sem biblioteca — funciona offline) ───────────
+// Desenhado à mão em SVG de propósito: nenhuma dependência externa, então a
+// aba nunca fica em branco por falta de internet ou por abrir via file://.
+// Pizza e barras cobrem o que a Dashboard precisa mostrar.
+const GRAF_CORES=['#005EC4','#1A7A4A','#C0392B','#F7A30A','#7B5EA7','#0E8B8B','#B4690E','#556270'];
+
+function _grafConta(log, campoFn){
+  const m=new Map();
+  log.forEach(r=>{ const k=campoFn(r); if(k==null||k==='') return; m.set(k,(m.get(k)||0)+1); });
+  return [...m.entries()].map(([label,valor])=>({label,valor})).sort((a,b)=>b.valor-a.valor);
+}
+
+// Pizza (donut). dados=[{label,valor,cor?}]. Mostra % e legenda; hover nativo.
+function svgPizza(titulo, dados){
+  const total=dados.reduce((a,d)=>a+d.valor,0);
+  if(!total) return _grafCard(titulo,'<div class="graf-vazio">Sem dados</div>');
+  const cx=90,cy=90,r=70,ri=42;
+  let ang=-Math.PI/2, paths='';
+  dados.forEach((d,i)=>{
+    const frac=d.valor/total, a2=ang+frac*2*Math.PI;
+    const cor=d.cor||GRAF_CORES[i%GRAF_CORES.length];
+    // arco externo + interno (donut) via path
+    const x1=cx+r*Math.cos(ang), y1=cy+r*Math.sin(ang);
+    const x2=cx+r*Math.cos(a2),  y2=cy+r*Math.sin(a2);
+    const xi2=cx+ri*Math.cos(a2),yi2=cy+ri*Math.sin(a2);
+    const xi1=cx+ri*Math.cos(ang),yi1=cy+ri*Math.sin(ang);
+    const grande=frac>0.5?1:0;
+    // Fatia de 100% precisa de dois arcos para não sumir
+    if(frac>=0.999){
+      paths+='<circle cx="'+cx+'" cy="'+cy+'" r="'+((r+ri)/2)+'" fill="none" stroke="'+cor+'" stroke-width="'+(r-ri)+'"><title>'+esc(d.label)+': '+d.valor+' (100%)</title></circle>';
+    } else {
+      paths+='<path d="M '+x1.toFixed(1)+' '+y1.toFixed(1)+' A '+r+' '+r+' 0 '+grande+' 1 '+x2.toFixed(1)+' '+y2.toFixed(1)
+        +' L '+xi2.toFixed(1)+' '+yi2.toFixed(1)+' A '+ri+' '+ri+' 0 '+grande+' 0 '+xi1.toFixed(1)+' '+yi1.toFixed(1)+' Z" '
+        +'fill="'+cor+'" stroke="var(--white)" stroke-width="1"><title>'+esc(d.label)+': '+d.valor+' ('+Math.round(frac*100)+'%)</title></path>';
+    }
+    ang=a2;
+  });
+  const svg='<svg viewBox="0 0 180 180" width="150" height="150">'+paths
+    +'<text x="90" y="86" text-anchor="middle" font-size="22" font-weight="700" fill="var(--dark)">'+total+'</text>'
+    +'<text x="90" y="104" text-anchor="middle" font-size="10" fill="var(--grey-m)">total</text></svg>';
+  const leg=dados.map((d,i)=>{
+    const cor=d.cor||GRAF_CORES[i%GRAF_CORES.length];
+    return '<div class="graf-leg-item"><span class="graf-leg-cor" style="background:'+cor+'"></span>'
+      +esc(d.label)+' <b>'+d.valor+'</b> <span style="color:var(--grey-m)">('+Math.round(d.valor/total*100)+'%)</span></div>';
+  }).join('');
+  return _grafCard(titulo,'<div class="graf-pizza-wrap"><div>'+svg+'</div><div class="graf-leg">'+leg+'</div></div>');
+}
+
+// Barras horizontais. dados=[{label,valor}].
+function svgBarras(titulo, dados, unidade){
+  if(!dados.length) return _grafCard(titulo,'<div class="graf-vazio">Sem dados</div>');
+  const max=Math.max.apply(null,dados.map(d=>d.valor))||1;
+  const linhas=dados.slice(0,12).map((d,i)=>{
+    const cor=GRAF_CORES[i%GRAF_CORES.length];
+    const larg=Math.max(2, Math.round(d.valor/max*100));
+    return '<div class="graf-bar-row" title="'+esc(d.label)+': '+d.valor+(unidade?' '+unidade:'')+'">'
+      +'<div class="graf-bar-lbl">'+esc(d.label)+'</div>'
+      +'<div class="graf-bar-track"><div class="graf-bar-fill" style="width:'+larg+'%;background:'+cor+'"></div></div>'
+      +'<div class="graf-bar-val">'+d.valor+'</div></div>';
+  }).join('');
+  return _grafCard(titulo,'<div class="graf-barras">'+linhas+'</div>');
+}
+
+function _grafCard(titulo, corpo){
+  return '<div class="graf-card"><div class="graf-card-tt">'+esc(titulo)+'</div>'+corpo+'</div>';
+}
+
+function renderGraficos(){
+  const host=document.getElementById('graf-content');
+  if(!host) return;
+  const base=getLogParaUsuario(SESSION);
+  if(!base.length){
+    host.innerHTML='<div class="no-data">Nenhuma NF carimbada para gerar gráficos.</div>';
+    return;
+  }
+  const locais=[...new Set(base.map(r=>normalizeLocalNome(r.local)).filter(Boolean))].sort();
+  const users =[...new Set(base.map(r=>r.user).filter(Boolean))].sort();
+  const anos  =[...new Set(base.map(r=>{const m=/\/(\d{4})/.exec(fmtDataBR(r.dataCarimbo));return m?m[1]:null;}).filter(Boolean))].sort();
+
+  const log=base.filter(r=>{
+    if(_grafFiltros.local && normalizeLocalNome(r.local)!==_grafFiltros.local) return false;
+    if(_grafFiltros.user  && r.user!==_grafFiltros.user) return false;
+    if(_grafFiltros.tipo  && r.tipo!==_grafFiltros.tipo) return false;
+    if(_grafFiltros.ano){ const m=/\/(\d{4})/.exec(fmtDataBR(r.dataCarimbo)); if(!m||m[1]!==_grafFiltros.ano) return false; }
+    return true;
+  });
+
+  const temF=_grafFiltros.local||_grafFiltros.user||_grafFiltros.tipo||_grafFiltros.ano;
+  const barra='<div class="graf-filtros">'
+    +'<span class="graf-filtros-tt">🔎 Filtrar:</span>'
+    +_grafSelect('local','Local', locais)
+    +_grafSelectPares('tipo','Tipo',[['PECAS','Peças/Materiais'],['SERVICOS','Serviços']])
+    +_grafSelect('user','Usuário', users)
+    +_grafSelect('ano','Ano', anos)
+    +(temF?'<button class="dash-tools-limpar" onclick="limparFiltrosGraf()">↺ limpar filtros</button>':'')
+    +'<span class="graf-filtros-n">'+log.length+' de '+base.length+' NF(s)</span></div>';
+
+  if(!log.length){
+    host.innerHTML=cardsMetricas([])+barra+'<div class="no-data">Nenhuma NF com esses filtros.</div>';
+    return;
+  }
+
+  // Séries temporais (por mês do carimbo, cronológico).
+  const serie=(valorFn)=>{
+    const m=new Map();
+    log.forEach(r=>{ const mm=/^\d{2}\/(\d{2})\/(\d{4})/.exec(fmtDataBR(r.dataCarimbo)); if(!mm) return;
+      const k=mm[2]+'-'+mm[1]; const o=m.get(k)||[]; o.push(r); m.set(k,o); });
+    return [...m.entries()].sort((a,b)=>a[0]<b[0]?-1:1).map(([k,rs])=>{
+      const [y,mo]=k.split('-'); return {label:MESES_ABREV[+mo-1]||mo, valor:valorFn(rs)};
+    });
+  };
+  const porMes=serie(rs=>rs.length);
+  const ltMes =serie(rs=>{ const v=rs.filter(r=>r.leadTime!=null).map(r=>r.leadTime);
+    return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0; });
+
+  const tipo=[
+    {label:'Peças/Mat.',valor:log.filter(r=>r.tipo==='PECAS').length,    cor:'#556270'},
+    {label:'Serviços',  valor:log.filter(r=>r.tipo==='SERVICOS').length, cor:'#F7A30A'},
+  ].filter(d=>d.valor>0);
+  const conf=[
+    {label:'Conformes',    valor:log.filter(r=>r.conf==='SIM').length, cor:'#1A7A4A'},
+    {label:'Não conformes',valor:log.filter(r=>r.conf==='NAO').length, cor:'#C0392B'},
+  ].filter(d=>d.valor>0);
+  const aplic=_grafConta(log, r=>r.aplic==='DIRETA'?'Direta':r.aplic==='ESTOQUE'?'Estoque':'');
+
+  host.innerHTML = cardsMetricas(log) + barra
+    + '<div class="graf-grid graf-grid-4">'
+    + svgVelocimetro('Taxa de Conformidade', (log.length?Math.round(log.filter(r=>r.conf==='SIM').length/log.length*100):0), 100,
+        (log.filter(r=>r.conf==='SIM').length)+' de '+log.length+' conformes',
+        [[0,69,'#E0342B'],[69,89,'#F4C20D'],[89,100,'#3CA83C']], '%',
+        [['#E0342B','Crítico','0 - 69%'],['#F4C20D','Atenção','70 - 89%'],['#3CA83C','Conforme','90 - 100%']])
+    + svgBarrasVert('Notas Carimbadas por Mês', porMes)
+    + svgLinha('Lead Time Médio por Mês (dias)', ltMes, '#4D6FB5', 'dias')
+    + rankLista('Top 10 Fornecedores', _grafConta(log, r=>r.forn||'—').slice(0,10))
+    + '</div>'
+    + '<div class="graf-grid graf-grid-5">'
+    + svgBarras('Notas por Local', _grafConta(log, r=>normalizeLocalNome(r.local)||'—'))
+    + svgBarras('Notas por Usuário', _grafConta(log, r=>r.user||'—'))
+    + svgPizza('Distribuição por Tipo', tipo)
+    + svgBarras('Aplicação', aplic)
+    + barrasPct('Conformidade por Usuário', _confPorUser(log))
+    + '</div>'
+    + '<div class="graf-rodape">ℹ Lead time calculado entre a data da NF e a data do carimbo.</div>';
+}
+const MESES_ABREV=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+// % de conformidade por usuário: [{label, valor(%), extra(qtd)}].
+function _confPorUser(log){
+  const m=new Map();
+  log.forEach(r=>{ const u=r.user||'—'; const o=m.get(u)||{sim:0,n:0}; if(r.conf==='SIM')o.sim++; o.n++; m.set(u,o); });
+  return [...m.entries()].map(([label,o])=>({label, valor:Math.round(o.sim/o.n*100), n:o.n}))
+    .sort((a,b)=>b.valor-a.valor);
+}
+
+
+// ─── Cards de métrica (topo dos Gráficos e da Dashboard) ─────────
+function cardsMetricas(lista){
+  const t=lista.length;
+  const sim=lista.filter(r=>r.conf==='SIM').length;
+  const nao=lista.filter(r=>r.conf==='NAO').length;
+  const pec=lista.filter(r=>r.tipo==='PECAS').length;
+  const ser=lista.filter(r=>r.tipo==='SERVICOS').length;
+  const lts=lista.filter(r=>r.leadTime!=null).map(r=>r.leadTime);
+  const lt=lts.length?Math.round(lts.reduce((a,b)=>a+b,0)/lts.length):'–';
+  const pct=v=>t?Math.round(v/t*100):0;
+  const cards=[
+    {label:'Total de Notas',   val:t,            sub:'NFs processadas',      cls:'c-blue', icon:'📋'},
+    {label:'Conformidade',     val:pct(sim)+'%', sub:sim+' conformes',       cls:'c-green',icon:'✅'},
+    {label:'Não Conformes',    val:nao,          sub:pct(nao)+'% do total',  cls:'c-red',  icon:'❌'},
+    {label:'Peças / Materiais',val:pec,          sub:pct(pec)+'% do total',  cls:'c-grey', icon:'📦'},
+    {label:'Serviços',         val:ser,          sub:pct(ser)+'% do total',  cls:'c-gold', icon:'🔧'},
+    {label:'Lead Time Médio',  val:lt,           sub:'dias (NF → carimbo)',  cls:'c-blue', icon:'⏱'},
+  ];
+  return '<div class="dash-grid">'+cards.map(c=>'<div class="dash-card '+c.cls+'">'
+    +'<div class="dash-label">'+c.label+'</div><div class="dash-value">'+c.val+'</div>'
+    +'<div class="dash-sub">'+c.sub+'</div><div class="dash-icon">'+c.icon+'</div></div>').join('')+'</div>';
+}
+
+// ─── Barras VERTICAIS (com eixo Y, rótulos e valor no topo) ──────
+// destaque: índice da barra a realçar (a última, por padrão).
+function svgBarrasVert(titulo, dados){
+  if(!dados.length) return _grafCard(titulo,'<div class="graf-vazio">Sem dados</div>');
+  const W=Math.max(320, dados.length*54+40), H=210, padL=30, padB=26, padT=20;
+  const max=Math.max.apply(null,dados.map(d=>d.valor))||1;
+  const passo=_grafEscala(max);
+  const topo=Math.ceil(max/passo)*passo || passo;
+  const n=dados.length;
+  const bw=Math.min(38,(W-padL-10)/n*0.6);
+  const gap=(W-padL-10)/n;
+  const y=v=>H-padB-(v/topo)*(H-padB-padT);
+  let grade='';
+  for(let g=0; g<=topo+0.001; g+=passo){
+    const yy=y(g);
+    grade+='<line x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-6)+'" y2="'+yy.toFixed(1)+'" stroke="var(--grey-xl)" stroke-width="1"/>'
+      +'<text x="'+(padL-4)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--grey-m)">'+g+'</text>';
+  }
+  const barras=dados.map((d,i)=>{
+    const cx=padL+gap*i+gap/2;
+    const yy=y(d.valor);
+    const cor=(i===n-1)?'#2E4A7A':'#7FA0D8';
+    return '<rect x="'+(cx-bw/2).toFixed(1)+'" y="'+yy.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(H-padB-yy).toFixed(1)+'" rx="3" fill="'+cor+'"><title>'+esc(d.label)+': '+d.valor+'</title></rect>'
+      +'<text x="'+cx.toFixed(1)+'" y="'+(yy-5).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="700" fill="var(--dark)">'+d.valor+'</text>'
+      +'<text x="'+cx.toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="var(--grey-m)">'+esc(d.label)+'</text>';
+  }).join('');
+  return _grafCard(titulo,'<div style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" width="100%" style="min-width:'+W+'px">'+grade+barras+'</svg></div>');
+}
+// Escolhe um passo "redondo" para o eixo (1,2,5,10,20,50…).
+function _grafEscala(max){
+  const alvo=max/4; const pot=Math.pow(10,Math.floor(Math.log10(alvo||1)));
+  const cand=[1,2,5,10].map(x=>x*pot);
+  return cand.find(c=>c>=alvo) || cand[cand.length-1];
+}
+
+// ─── Lista ranqueada (Top N) ─────────────────────────────────────
+function rankLista(titulo, dados){
+  if(!dados.length) return _grafCard(titulo,'<div class="graf-vazio">Sem dados</div>');
+  const max=Math.max.apply(null,dados.map(d=>d.valor))||1;
+  const linhas=dados.map((d,i)=>{
+    const larg=Math.max(4,Math.round(d.valor/max*100));
+    return '<div class="rank-row" title="'+esc(d.label)+': '+d.valor+'">'
+      +'<span class="rank-n">'+(i+1)+'</span>'
+      +'<span class="rank-lbl">'+esc(d.label)+'</span>'
+      +'<span class="rank-bar"><span class="rank-fill" style="width:'+larg+'%"></span></span>'
+      +'<span class="rank-val">'+d.valor+'</span></div>';
+  }).join('');
+  return _grafCard(titulo,'<div class="rank-list">'+linhas+'</div>');
+}
+
+// ─── Barras horizontais com % (Conformidade por Usuário) ─────────
+function barrasPct(titulo, dados){
+  if(!dados.length) return _grafCard(titulo,'<div class="graf-vazio">Sem dados</div>');
+  const linhas=dados.map((d,i)=>{
+    const cor=d.valor>=90?'#1A7A4A':d.valor>=70?'#F7A30A':'#C0392B';
+    return '<div class="graf-bar-row" title="'+esc(d.label)+': '+d.valor+'% ('+(d.n||0)+' NF)">'
+      +'<div class="graf-bar-lbl">'+esc(d.label)+'</div>'
+      +'<div class="graf-bar-track"><div class="graf-bar-fill" style="width:'+Math.max(2,d.valor)+'%;background:'+cor+'"></div></div>'
+      +'<div class="graf-bar-val">'+d.valor+'%</div></div>';
+  }).join('');
+  return _grafCard(titulo,'<div class="graf-barras">'+linhas+'</div>');
+}
+
+// ─── Filtros dos gráficos ────────────────────────────────────────
+let _grafFiltros={local:'',user:'',tipo:'',ano:''};
+function setFiltroGraf(chave, valor){ _grafFiltros[chave]=valor; renderGraficos(); }
+function limparFiltrosGraf(){ _grafFiltros={local:'',user:'',tipo:'',ano:''}; renderGraficos(); }
+function _grafSelect(chave, rot, opcoes){
+  const atual=_grafFiltros[chave]||'';
+  return '<select class="dash-filtro" onchange="setFiltroGraf(\''+chave+'\', this.value)">'
+    +'<option value="">'+esc(rot)+': todos</option>'
+    +opcoes.map(o=>'<option value="'+esc(o)+'"'+(o===atual?' selected':'')+'>'+esc(o)+'</option>').join('')
+    +'</select>';
+}
+function _grafSelectPares(chave, rot, pares){
+  const atual=_grafFiltros[chave]||'';
+  return '<select class="dash-filtro" onchange="setFiltroGraf(\''+chave+'\', this.value)">'
+    +'<option value="">'+esc(rot)+': todos</option>'
+    +pares.map(pp=>'<option value="'+esc(pp[0])+'"'+(pp[0]===atual?' selected':'')+'>'+esc(pp[1])+'</option>').join('')
+    +'</select>';
+}
+
+// ─── Velocímetro (gauge semicircular) ────────────────────────────
+// faixas=[[de,ate,cor],...] pinta o arco por zona (ex.: vermelho/amarelo/verde).
+function svgVelocimetro(titulo, valor, max, unidade, faixas, sufixo, legenda){
+  // Velocímetro semicircular. fr=0 aponta à esquerda, fr=1 à direita; cada
+  // faixa é sempre < 180°, então large-arc é 0 (marcá-lo em 1 mandava o arco
+  // pelo caminho longo, por baixo — o bug anterior).
+  const cx=120, cy=124, r=92, W=24;
+  const pt=(fr,rr)=>{ const a=Math.PI*(1-Math.min(1,Math.max(0,fr)));   // π→0
+    return [cx+rr*Math.cos(a), cy-rr*Math.sin(a)]; };                    // y p/ cima
+  // Gap entre zonas proporcional à largura do arco (não afeta os extremos 0 e 1).
+  const gap=0.6/(Math.PI*r);   // separação mínima (~1px) entre as faixas
+  const arco=(f0,f1,cor)=>{
+    const a=f0+(f0>0?gap:0), b=f1-(f1<1?gap:0);
+    if(b<=a) return '';
+    const [x0,y0]=pt(a,r), [x1,y1]=pt(b,r);
+    return '<path d="M '+x0.toFixed(1)+' '+y0.toFixed(1)+' A '+r+' '+r+' 0 0 1 '+x1.toFixed(1)+' '+y1.toFixed(1)+'" '
+      +'fill="none" stroke="'+cor+'" stroke-width="'+W+'" stroke-linecap="butt"/>';
+  };
+  let arcos='';
+  (faixas||[[0,max,'#005EC4']]).forEach(f=>{ arcos+=arco(f[0]/max, f[1]/max, f[2]); });
+
+  // Marcações de escala: um tracinho a cada 10% (11 ao todo), sobre a banda.
+  let ticks='';
+  for(let i=0;i<=10;i++){ const fr=i/10;
+    const [xa,ya]=pt(fr, r-W/2-3), [xb,yb]=pt(fr, r-W/2-9);   // logo ABAIXO da faixa
+    ticks+='<line x1="'+xa.toFixed(1)+'" y1="'+ya.toFixed(1)+'" x2="'+xb.toFixed(1)+'" y2="'+yb.toFixed(1)+'" stroke="rgba(0,0,0,.55)" stroke-width="'+(i%5===0?2:1.3)+'"/>';
+  }
+
+  // Ponteiro afilado (triângulo) + cubo central.
+  const fr=Math.min(1,Math.max(0,valor/max));
+  const a=Math.PI*(1-fr);
+  const dx=Math.cos(a), dy=-Math.sin(a);          // direção da ponta (y p/ cima → -sin)
+  const [tx,ty]=[cx+(r-8)*dx, cy+(r-8)*dy];       // ponta
+  const bw=3;                                      // meia-largura da base (ponteiro fino)
+  const [b1x,b1y]=[cx-bw*dy, cy+bw*dx];            // base ± perpendicular
+  const [b2x,b2y]=[cx+bw*dy, cy-bw*dx];
+  const ponteiro='<polygon points="'+tx.toFixed(1)+','+ty.toFixed(1)+' '+b1x.toFixed(1)+','+b1y.toFixed(1)+' '+b2x.toFixed(1)+','+b2y.toFixed(1)+'" fill="var(--dark)"/>'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="var(--dark)"/><circle cx="'+cx+'" cy="'+cy+'" r="2.5" fill="var(--white)"/>';
+
+  // Extremos e ponto médio da escala.
+  // Escala embaixo: 0% à esquerda, 50% ao centro, 100% à direita (como o modelo).
+  const escala='<text x="26" y="150" text-anchor="middle" font-size="11" fill="var(--grey-m)">0'+esc(sufixo||'')+'</text>'
+    +'<text x="'+cx+'" y="150" text-anchor="middle" font-size="11" fill="var(--grey-m)">'+Math.round(max/2)+esc(sufixo||'')+'</text>'
+    +'<text x="214" y="150" text-anchor="middle" font-size="11" fill="var(--grey-m)">'+max+esc(sufixo||'')+'</text>';
+
+  const svg='<svg viewBox="0 0 240 158" width="100%" style="max-width:320px">'
+    +arcos+ticks+ponteiro
+    +'<text x="'+cx+'" y="99" text-anchor="middle" font-size="26" font-weight="800" fill="var(--dark)">'+valor+esc(sufixo||'')+'</text>'
+    +'<text x="'+cx+'" y="117" text-anchor="middle" font-size="11" fill="var(--grey-m)">'+esc(unidade)+'</text>'
+    +escala+'</svg>';
+
+  // Legenda em caixa arredondada (como o modelo).
+  let leg='';
+  if(legenda && legenda.length){
+    leg='<div class="velo-leg">'+legenda.map(l=>
+      '<div class="velo-leg-i"><span class="velo-leg-dot" style="background:'+l[0]+'"></span>'
+      +'<div><div class="velo-leg-t">'+esc(l[1])+'</div><div class="velo-leg-r">'+esc(l[2])+'</div></div></div>'
+    ).join('')+'</div>';
+  }
+  return _grafCard(titulo, '<div style="text-align:center">'+svg+'</div>'+leg);
+}
+
+// ─── Gráfico de linha ────────────────────────────────────────────
+function svgLinha(titulo, dados, cor, unidade){
+  if(dados.length<1) return _grafCard(titulo,'<div class="graf-vazio">Sem dados</div>');
+  if(dados.length===1){ // um ponto só: mostra como número grande
+    return _grafCard(titulo,'<div style="text-align:center;padding:16px"><div style="font-size:30px;font-weight:700;color:'+cor+'">'+dados[0].valor+'</div><div style="font-size:11px;color:var(--grey-m)">'+esc(dados[0].label)+(unidade?' · '+unidade:'')+'</div></div>');
+  }
+  const W=420, H=170, pad=30, padB=26;
+  const max=Math.max.apply(null,dados.map(d=>d.valor))||1;
+  const n=dados.length;
+  const x=i=>pad + i*(W-pad-8)/(n-1);
+  const y=v=>H-padB - v/max*(H-padB-12);
+  const pts=dados.map((d,i)=>[x(i),y(d.valor)]);
+  const linha=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  // área sob a linha
+  const area='M'+pts[0][0].toFixed(1)+' '+(H-padB)+' '+pts.map(p=>'L'+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')+' L'+pts[n-1][0].toFixed(1)+' '+(H-padB)+' Z';
+  const grade=[0,0.5,1].map(f=>{ const yy=(H-padB)-f*(H-padB-12);
+    return '<line x1="'+pad+'" y1="'+yy.toFixed(1)+'" x2="'+(W-8)+'" y2="'+yy.toFixed(1)+'" stroke="var(--grey-xl)" stroke-width="1"/>'
+      +'<text x="'+(pad-4)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--grey-m)">'+Math.round(f*max)+'</text>'; }).join('');
+  const rotulos=dados.map((d,i)=>{ if(n>8 && i%Math.ceil(n/8)!==0 && i!==n-1) return '';
+    return '<text x="'+x(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="var(--grey-m)">'+esc(d.label)+'</text>'; }).join('');
+  const bolas=pts.map((p,i)=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="'+cor+'"><title>'+esc(dados[i].label)+': '+dados[i].valor+(unidade?' '+unidade:'')+'</title></circle>').join('');
+  // Rótulo de dados: o valor acima de cada ponto (abaixo, se estiver colado no topo).
+  const valores=pts.map((p,i)=>{
+    const acima=p[1]-8 > 12;
+    const yy=acima ? p[1]-7 : p[1]+13;
+    return '<text x="'+p[0].toFixed(1)+'" y="'+yy.toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="700" fill="var(--dark)">'+dados[i].valor+'</text>';
+  }).join('');
+  const svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%">'+grade
+    +'<path d="'+area+'" fill="'+cor+'" opacity="0.10"/>'
+    +'<path d="'+linha+'" fill="none" stroke="'+cor+'" stroke-width="2.5"/>'+bolas+valores+rotulos+'</svg>';
+  return _grafCard(titulo, svg);
+}
+
+
 function renderInlineDash(){
   const log=getLogParaUsuario(SESSION);
-  const total=log.length;
-  const sim=log.filter(r=>r.conf==='SIM').length;
-  const nao=log.filter(r=>r.conf==='NAO').length;
-  const pecas=log.filter(r=>r.tipo==='PECAS').length;
-  const serv=log.filter(r=>r.tipo==='SERVICOS').length;
-  const lts=log.filter(r=>r.leadTime!=null).map(r=>r.leadTime);
-  const avgLt=lts.length?(lts.reduce((a,b)=>a+b,0)/lts.length).toFixed(1):'-';
-  const pct=v=>total?Math.round(v/total*100):0;
-  const cards=[
-    {label:'Total Carimbadas',val:total,sub:'NFs processadas',cls:'c-blue',icon:'📋'},
-    {label:'Conformes',val:sim,sub:pct(sim)+'%',cls:'c-green',icon:'✅'},
-    {label:'Não Conformes',val:nao,sub:pct(nao)+'%',cls:'c-red',icon:'❌'},
-    {label:'Peças/Materiais',val:pecas,sub:pct(pecas)+'%',cls:'c-grey',icon:'📦'},
-    {label:'Serviços',val:serv,sub:pct(serv)+'%',cls:'c-gold',icon:'🔧'},
-    {label:'Lead Time Médio',val:avgLt,sub:'dias (NF→carimbo)',cls:'c-blue',icon:'⏱'},
-  ];
-  let html='<div class="dash-grid">'+cards.map(c=>'<div class="dash-card '+c.cls+'"><div class="dash-label">'+c.label+'</div><div class="dash-value">'+c.val+'</div><div class="dash-sub">'+c.sub+'</div><div class="dash-icon">'+c.icon+'</div></div>').join('')+'</div>';
+  // Os cards ficam num host próprio para o filtro/busca recalculá-los sem
+  // reconstruir a página. cardsMetricas(log) é a versão inicial (sem filtro).
+  let html='<div class="dash-cards-host">'+cardsMetricas(log)+'</div>';
   html+='<div class="section-hdr" style="max-width:none;">Registro de NFs Carimbadas</div>';
   if(!log.length){
     // Distinguir "não há nada" de "há, mas você não enxerga": antes as duas
@@ -3357,7 +3933,9 @@ function renderInlineDash(){
   else{
     html+=tabelaDash(log);
   }
-  document.getElementById('inline-dash-content').innerHTML=html;
+  const _cInline=document.getElementById('inline-dash-content');
+  _cInline.innerHTML=html;
+  ativarDashTabela(_cInline);   // pinta a tabela DENTRO deste container
 }
 // ─── APAGAR CARIMBO ───────────────────────────────────────────────
 function apagarCarimbo(){
